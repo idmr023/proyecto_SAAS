@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/contexts/AuthContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,7 +19,9 @@ import {
 import { categories } from "@/lib/modules-data"
 import * as LucideIcons from "lucide-react"
 import type { Module } from "@/types"
-import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
+import { useErrorHandler } from "@/hooks/useErrorHandler"
+import { deploySchema } from "@/lib/validations"
 import {
   Loader2,
   Search,
@@ -30,6 +34,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { analytics } from "@/services/analytics"
 
 interface BuildItem {
   module: Module
@@ -38,15 +43,24 @@ interface BuildItem {
 }
 
 export default function GeneratorPage() {
+  const { t } = useTranslation()
   const { isDemo } = useAuth()
+  const { handleError, handleSuccess } = useErrorHandler("GeneratorPage")
   const [search, setSearch] = useState("")
   const [buildList, setBuildList] = useState<BuildItem[]>([])
-  const [clientName, setClientName] = useState("")
-  const [clientNameError, setClientNameError] = useState("")
   const [deploying, setDeploying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [showDeployDialog, setShowDeployDialog] = useState(false)
   const [expanded, setExpanded] = useState<string[]>(categories.map((c) => c.id))
+
+  const {
+    register,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(deploySchema),
+    defaultValues: { clientName: "", modules: [] },
+  })
 
   const toggleCategory = (id: string) => {
     setExpanded((prev) =>
@@ -74,16 +88,17 @@ export default function GeneratorPage() {
   const isInBuild = (moduleId: string) => buildList.some((b) => b.module.id === moduleId)
 
   const addToBuild = (module: Module, catId: string, catName: string) => {
-    if (isInBuild(module.id)) {
-      toast.info(`${module.name} ya está en la lista`)
-      return
-    }
-    setBuildList((prev) => [...prev, { module, categoryId: catId, categoryName: catName }])
-    toast.success(`${module.name} agregado`)
+    if (isInBuild(module.id)) return
+    const newList = [...buildList, { module, categoryId: catId, categoryName: catName }]
+    setBuildList(newList)
+    setValue("modules", newList.map((b) => b.module.id))
+    handleSuccess(`${module.name} agregado`)
   }
 
   const removeFromBuild = (moduleId: string) => {
-    setBuildList((prev) => prev.filter((b) => b.module.id !== moduleId))
+    const newList = buildList.filter((b) => b.module.id !== moduleId)
+    setBuildList(newList)
+    setValue("modules", newList.map((b) => b.module.id))
   }
 
   const getIcon = (iconName: string, className = "h-5 w-5") => {
@@ -91,21 +106,13 @@ export default function GeneratorPage() {
     return Icon ? <Icon className={className} /> : null
   }
 
-  const validate = (): boolean => {
+  const onDeploy = async () => {
     if (buildList.length === 0) {
-      toast.error("Agrega al menos un módulo a la lista")
-      return false
+      handleError("Agrega al menos un módulo a la lista")
+      return
     }
-    if (!clientName.trim()) {
-      setClientNameError("El nombre del cliente es obligatorio")
-      return false
-    }
-    setClientNameError("")
-    return true
-  }
 
-  const handleDeploy = async () => {
-    if (!validate()) return
+    analytics.track("deploy_start", { moduleCount: buildList.length })
 
     setDeploying(true)
     setShowDeployDialog(true)
@@ -128,42 +135,39 @@ export default function GeneratorPage() {
       setProgress(100)
 
       const names = buildList.map((b) => b.module.name).join(", ")
-      toast.success("Sistema desplegado", {
-        description: `${buildList.length} módulo${buildList.length > 1 ? "s" : ""} para ${clientName}: ${names}`,
-      })
+      analytics.track("deploy_success", { modules: names })
 
       setTimeout(() => {
+      handleSuccess(`${t("generator.deploy_success")} — ${buildList.length} módulo${buildList.length > 1 ? "s" : ""}: ${names}`)
         setShowDeployDialog(false)
         setBuildList([])
-        setClientName("")
         setProgress(0)
+        setDeploying(false)
       }, 1500)
     } catch {
       clearInterval(interval)
-      toast.error("Error al desplegar")
+      analytics.track("deploy_error")
+      handleError(t("generator.deploy_error"))
       setShowDeployDialog(false)
-    } finally {
       setDeploying(false)
     }
   }
 
   return (
     <div className="p-4 lg:p-6 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold tracking-tight">Generador de Sistemas</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("generator.title")}</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Arma tu sistema combinando módulos de distintas categorías
+          {t("generator.subtitle")}
         </p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* === CATALOG === */}
         <div className="flex-1 min-w-0">
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar módulos..."
+              placeholder={t("generator.search_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-9"
@@ -174,14 +178,13 @@ export default function GeneratorPage() {
             <Card>
               <CardContent className="py-10 text-center">
                 <Package className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">No se encontraron módulos</p>
+                <p className="text-sm text-muted-foreground">{t("generator.no_modules")}</p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-2">
               {filteredCategories.map((cat) => (
                 <Card key={cat.id} className="overflow-hidden">
-                  {/* Category header */}
                   <button
                     type="button"
                     onClick={() => toggleCategory(cat.id)}
@@ -245,12 +248,12 @@ export default function GeneratorPage() {
                                   {added ? (
                                     <>
                                       <X className="h-3 w-3" />
-                                      Quitar
+                                      {t("generator.remove")}
                                     </>
                                   ) : (
                                     <>
                                       <Plus className="h-3 w-3" />
-                                      Agregar
+                                      {t("generator.add")}
                                     </>
                                   )}
                                 </Button>
@@ -267,7 +270,6 @@ export default function GeneratorPage() {
           )}
         </div>
 
-        {/* === BUILD LIST SIDEBAR === */}
         <div className="w-full lg:w-80 shrink-0">
           <div className="lg:sticky lg:top-20">
             <Card>
@@ -275,7 +277,7 @@ export default function GeneratorPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle className="text-sm font-medium">Tu Lista</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t("generator.your_list")}</CardTitle>
                   </div>
                   <Badge variant="secondary" className="text-xs">
                     {buildList.length} módulo{buildList.length !== 1 ? "s" : ""}
@@ -287,7 +289,7 @@ export default function GeneratorPage() {
                   <div className="py-6 text-center">
                     <Package className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" />
                     <p className="text-xs text-muted-foreground">
-                      Agrega módulos desde el catálogo
+                      {t("generator.empty_list")}
                     </p>
                   </div>
                 ) : (
@@ -323,29 +325,25 @@ export default function GeneratorPage() {
 
                     <div className="space-y-2 pt-2 border-t">
                       <div className="space-y-1">
-                        <Label className="text-xs font-medium">Cliente</Label>
+                        <Label className="text-xs font-medium">{t("generator.client")}</Label>
                         <Input
-                          placeholder="Nombre del cliente"
-                          value={clientName}
-                          onChange={(e) => {
-                            setClientName(e.target.value)
-                            setClientNameError("")
-                          }}
-                          aria-invalid={!!clientNameError}
+                          placeholder={t("generator.client_placeholder")}
+                          {...register("clientName")}
+                          aria-invalid={!!errors.clientName}
                           className="h-8 text-xs"
                         />
-                        {clientNameError && (
-                          <p className="text-[10px] text-destructive">{clientNameError}</p>
+                        {errors.clientName && (
+                          <p className="text-[10px] text-destructive">{errors.clientName.message}</p>
                         )}
                       </div>
 
                       <div className="rounded-md bg-muted/50 px-2.5 py-2 text-xs space-y-1">
                         <div className="flex justify-between text-muted-foreground">
-                          <span>Módulos</span>
+                          <span>{t("generator.modules")}</span>
                           <span className="font-medium text-foreground">{buildList.length}</span>
                         </div>
                         <div className="flex justify-between text-muted-foreground">
-                          <span>Categorías</span>
+                          <span>{t("generator.categories")}</span>
                           <span className="font-medium text-foreground">
                             {new Set(buildList.map((b) => b.categoryId)).size}
                           </span>
@@ -354,18 +352,18 @@ export default function GeneratorPage() {
 
                       <Button
                         className="w-full h-8 text-xs"
-                        onClick={handleDeploy}
+                        onClick={onDeploy}
                         disabled={deploying || buildList.length === 0}
                       >
                         {deploying ? (
                           <>
                             <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
-                            Desplegando...
+                            {t("generator.deploying")}
                           </>
                         ) : (
                           <>
                             <Package className="h-3.5 w-3.5 mr-1" />
-                            Crear Sistema
+                            {t("generator.create_system")}
                           </>
                         )}
                       </Button>
@@ -373,7 +371,7 @@ export default function GeneratorPage() {
                       {isDemo && (
                         <div className="flex items-center justify-center gap-1 text-[10px] text-amber-500">
                           <FlaskConical className="h-3 w-3" />
-                          Demo — sin backend real
+                          {t("generator.demo_notice")}
                         </div>
                       )}
                     </div>
@@ -385,13 +383,12 @@ export default function GeneratorPage() {
         </div>
       </div>
 
-      {/* Deploy dialog */}
       <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-base">Desplegando Sistema</DialogTitle>
+            <DialogTitle className="text-base">{t("generator.deploy_title")}</DialogTitle>
             <DialogDescription className="text-xs">
-              {buildList.length} módulo{buildList.length !== 1 ? "s" : ""} para {clientName}
+              {buildList.length} módulo{buildList.length !== 1 ? "s" : ""}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-3">
@@ -404,11 +401,7 @@ export default function GeneratorPage() {
                 )
                 return (
                   <div key={item.module.id} className="flex items-center gap-2">
-                    <div
-                      className={cn(
-                        "h-1.5 flex-1 rounded-full bg-muted overflow-hidden",
-                      )}
-                    >
+                    <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
                       <div
                         className={cn(
                           "h-full rounded-full transition-all duration-500",
@@ -426,7 +419,7 @@ export default function GeneratorPage() {
             </div>
             <p className="text-xs text-center text-muted-foreground">
               {progress < 100
-                ? `Desplegando contenedores Docker...`
+                ? "Desplegando contenedores Docker..."
                 : "¡Sistema creado exitosamente!"}
             </p>
           </div>

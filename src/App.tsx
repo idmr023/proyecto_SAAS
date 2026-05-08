@@ -1,14 +1,18 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom"
+import { lazy, Suspense } from "react"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { ThemeProvider } from "@/contexts/ThemeContext"
 import ErrorBoundary from "@/components/shared/ErrorBoundary"
 import ProtectedRoute from "@/components/shared/ProtectedRoute"
 import Navbar from "@/components/shared/Navbar"
-import LoginPage from "@/pages/LoginPage"
-import DashboardPage from "@/pages/DashboardPage"
-import GeneratorPage from "@/pages/GeneratorPage"
-import NotFoundPage from "@/pages/NotFoundPage"
+import LoadingScreen from "@/components/shared/LoadingScreen"
 import { motion, AnimatePresence } from "framer-motion"
+import { useLocation } from "react-router-dom"
+
+const LoginPage = lazy(() => import("@/pages/LoginPage"))
+const DashboardPage = lazy(() => import("@/pages/DashboardPage"))
+const GeneratorPage = lazy(() => import("@/pages/GeneratorPage"))
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"))
 
 export default function App() {
   return (
@@ -17,15 +21,43 @@ export default function App() {
         <ThemeProvider>
           <AuthProvider>
             <Routes>
-              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/login"
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <LoginPage />
+                  </Suspense>
+                }
+              />
               <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/generator" element={<GeneratorPage />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <Suspense fallback={<LoadingScreen />}>
+                        <DashboardPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/generator"
+                    element={
+                      <Suspense fallback={<LoadingScreen />}>
+                        <GeneratorPage />
+                      </Suspense>
+                    }
+                  />
                 </Route>
               </Route>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="*" element={<NotFoundPage />} />
+              <Route
+                path="*"
+                element={
+                  <Suspense fallback={<LoadingScreen />}>
+                    <NotFoundPage />
+                  </Suspense>
+                }
+              />
             </Routes>
           </AuthProvider>
         </ThemeProvider>
