@@ -13,22 +13,25 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
+import DataTable, { type Column } from "@/components/shared/DataTable"
 import type { Portal } from "@/types"
 import {
   ExternalLink,
   RefreshCw,
   Server,
   Trash2,
-  Search,
   Plus,
   Activity,
   Clock,
+  Search,
   CheckCircle2,
   XCircle,
   Loader2,
 } from "lucide-react"
-import { toast } from "sonner"
 import { motion } from "framer-motion"
+import { useTranslation } from "react-i18next"
+import { useErrorHandler } from "@/hooks/useErrorHandler"
+import { portalSchema } from "@/lib/validations"
 
 const MOCK_PORTALS: Portal[] = [
   { id: "1", name: "ERP Acme Corp", category: "ERP", module: "Finanzas", status: "running", url: "https://erp.acmecorp.local", createdAt: "2026-04-28" },
@@ -81,17 +84,24 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 function QuickDeployDialog() {
+  const { t } = useTranslation()
+  const { handleSuccess } = useErrorHandler("DashboardPage")
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
+  const [nameError, setNameError] = useState("")
   const [category, setCategory] = useState("ERP")
   const [deploying, setDeploying] = useState(false)
   const [progress, setProgress] = useState(0)
 
   const handleDeploy = async () => {
-    if (!name.trim()) {
-      toast.error("Ingresa un nombre para el portal")
+    const result = portalSchema.safeParse({ name, category })
+    if (!result.success) {
+      const fieldError = result.error.issues.find((e) => String(e.path[0]) === "name")
+      setNameError((fieldError as unknown as { message: string })?.message ?? "Error de validación")
       return
     }
+    setNameError("")
+
     setDeploying(true)
     setProgress(0)
     const interval = setInterval(() => {
@@ -101,7 +111,7 @@ function QuickDeployDialog() {
     clearInterval(interval)
     setProgress(100)
     setTimeout(() => {
-      toast.success(`"${name}" desplegado correctamente`)
+      handleSuccess(`"${name}" desplegado correctamente`)
       setOpen(false)
       setName("")
       setProgress(0)
@@ -116,21 +126,27 @@ function QuickDeployDialog() {
       <DialogTrigger asChild>
         <Button size="sm">
           <Plus className="h-4 w-4 mr-1" />
-          Nuevo Portal
+          {t("dashboard.new_portal")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nuevo Portal</DialogTitle>
+          <DialogTitle>{t("dashboard.new_portal")}</DialogTitle>
           <DialogDescription>Despliega un módulo rápidamente</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Nombre del portal</label>
-            <Input placeholder="Ej: ERP Mi Empresa" value={name} onChange={(e) => setName(e.target.value)} />
+            <label className="text-sm font-medium">{t("dashboard.portal_name")}</label>
+            <Input
+              placeholder="Ej: ERP Mi Empresa"
+              value={name}
+              onChange={(e) => { setName(e.target.value); setNameError("") }}
+              aria-invalid={!!nameError}
+            />
+            {nameError && <p className="text-xs text-destructive">{nameError}</p>}
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Categoría</label>
+            <label className="text-sm font-medium">{t("dashboard.category")}</label>
             <div className="flex flex-wrap gap-1.5">
               {categories.map((cat) => (
                 <button
@@ -158,7 +174,7 @@ function QuickDeployDialog() {
           )}
           <Button className="w-full" onClick={handleDeploy} disabled={deploying}>
             {deploying && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-            {deploying ? "Desplegando..." : "Desplegar"}
+            {deploying ? t("dashboard.deploy_loading") : t("dashboard.deploy")}
           </Button>
         </div>
       </DialogContent>
@@ -167,6 +183,8 @@ function QuickDeployDialog() {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation()
+  const { handleSuccess, handleInfo } = useErrorHandler("DashboardPage")
   const [portals, setPortals] = useState<Portal[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -204,43 +222,95 @@ export default function DashboardPage() {
 
   const handleDelete = (id: string) => {
     setPortals((prev) => prev.filter((p) => p.id !== id))
-    toast.success("Portal eliminado")
+    handleSuccess(t("dashboard.delete_success"))
   }
 
   const handleRefresh = async () => {
-    toast.info("Actualizando estados...")
+    handleInfo(t("dashboard.refresh_info"))
     setLoading(true)
     await new Promise((r) => setTimeout(r, 1000))
     setPortals([...MOCK_PORTALS])
     setLoading(false)
-    toast.success("Estados actualizados")
+    handleSuccess(t("dashboard.refresh_success"))
   }
 
   const statCards = [
-    { label: "Total", value: stats.total, icon: Server, color: "text-primary" },
-    { label: "Activos", value: stats.running, icon: CheckCircle2, color: "text-emerald-500" },
-    { label: "Detenidos", value: stats.stopped, icon: Clock, color: "text-amber-500" },
-    { label: "Errores", value: stats.error, icon: XCircle, color: "text-red-500" },
+    { label: t("dashboard.total"), value: stats.total, icon: Server, color: "text-primary" },
+    { label: t("dashboard.active"), value: stats.running, icon: CheckCircle2, color: "text-emerald-500" },
+    { label: t("dashboard.stopped"), value: stats.stopped, icon: Clock, color: "text-amber-500" },
+    { label: t("dashboard.errors"), value: stats.error, icon: XCircle, color: "text-red-500" },
+  ]
+
+  const portalColumns: Column<Portal>[] = [
+    {
+      key: "name",
+      header: "Nombre",
+      sortable: true,
+      render: (portal) => (
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${statusConfig[portal.status]?.color ?? "text-red-500"} bg-current/10`}>
+            <div
+              className={`h-2.5 w-2.5 rounded-full ${portal.status === "running" ? "animate-pulse" : ""}`}
+              style={{ backgroundColor: statusConfig[portal.status]?.color.replace("text-", "") ?? "red" }}
+            />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium text-sm truncate">{portal.name}</h3>
+              <Badge variant={statusConfig[portal.status]?.variant ?? "destructive"} className="shrink-0 text-[10px] h-5 px-2">
+                {statusConfig[portal.status]?.label ?? "Error"}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {portal.category} &rarr; {portal.module}
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      cellClass: "shrink-0 w-[120px]",
+      render: (portal) => (
+        <div className="flex items-center gap-1 justify-end">
+          {portal.url && portal.status === "running" && (
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" asChild>
+              <a href={portal.url} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                {t("dashboard.open")}
+              </a>
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            onClick={() => handleDelete(portal.id)}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      ),
+    },
   ]
 
   return (
     <div className="p-4 lg:p-6 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Sala de Portales</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Servicios activos y estado en tiempo real</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("dashboard.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("dashboard.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} />
-            Actualizar
+            {t("dashboard.refresh")}
           </Button>
           <QuickDeployDialog />
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 mb-6">
         {statCards.map((stat, i) => (
           <motion.div
@@ -266,102 +336,25 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Search + List */}
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nombre, categoría o módulo..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9"
-          />
-        </div>
-
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <Skeleton className="h-5 w-48" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
-                    <Skeleton className="h-8 w-24" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Server className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
-              <p className="text-muted-foreground">
-                {search ? "Sin resultados para esa búsqueda" : "No hay portales activos. Despliega uno desde el Generador."}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-2">
-            {filtered.map((portal, i) => {
-              const cfg = statusConfig[portal.status] ?? statusConfig.error
-              return (
-                <motion.div
-                  key={portal.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.25 }}
-                >
-                  <Card className="transition-all hover:shadow-sm hover:border-primary/30 group">
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${cfg.color} bg-current/10`}>
-                          <div className={`h-2.5 w-2.5 rounded-full ${portal.status === "running" ? "animate-pulse" : ""}`}
-                            style={{ backgroundColor: cfg.color.replace("text-", "") }}
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-sm truncate">{portal.name}</h3>
-                            <Badge variant={cfg.variant} className="shrink-0 text-[10px] h-5 px-2">
-                              {cfg.label}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {portal.category} &rarr; {portal.module}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {portal.url && portal.status === "running" && (
-                          <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" asChild>
-                            <a href={portal.url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                              Abrir
-                            </a>
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleDelete(portal.id)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              )
-            })}
-          </div>
-        )}
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={t("dashboard.search_placeholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9 h-9"
+        />
       </div>
 
-      {/* Activity Feed */}
+      <DataTable<Portal>
+        columns={portalColumns}
+        data={filtered}
+        loading={loading}
+        searchable={false}
+        emptyMessage={search ? t("dashboard.no_results") : t("dashboard.no_portals")}
+        keyExtractor={(p) => p.id}
+      />
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -370,7 +363,7 @@ export default function DashboardPage() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Activity className="h-4 w-4 text-muted-foreground" />
-          <h2 className="text-sm font-medium">Actividad Reciente</h2>
+          <h2 className="text-sm font-medium">{t("dashboard.recent_activity")}</h2>
         </div>
         <Card>
           <CardContent className="p-0">
