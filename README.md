@@ -1,96 +1,262 @@
-# SaaS Orchestrator — Panel Administrativo (Frontend)
+# SaaS Orchestrator
 
-Breve descripción
-------------------
+> Panel Administrativo para digitalización de MYPES
 
-Proyecto para permitir a MYPES (restaurantes, bodegas, servicios textiles, etc.) acceder a herramientas digitales configurables mediante un motor de generación automática. Esta carpeta contiene la aplicación frontend del Panel Administrativo, creada con React + TypeScript + Vite.
+---
 
-Problema y propósito
---------------------
+## ¿Qué es este proyecto?
 
-- Problema: muchas MYPES no registran ni gestionan correctamente transacciones, clientes, compras y stock.
-- Propósito: ofrecer un panel admin y un constructor visual que permita crear instancias funcionales y personalizadas sin desarrollo a medida largo.
+**SaaS Orchestrator** es una plataforma SaaS diseñada para que las **MYPES** (restaurantes, bodegas, servicios textiles, etc.) puedan acceder a herramientas digitales de gestión sin necesidad de desarrollo a medida.
 
-Stack (resumen)
----------------
+El proyecto cuenta con un **motor de generación automática** que crea instancias personalizadas del panel según el tipo de negocio, permitiendo:
 
-- Frontend: React + TypeScript + Vite
-- Backend: Node.js (motor de generación)
-- Datos/Auth: Supabase (planificado)
-- Infra: Docker (planificado)
+- Registro y gestión de **transacciones**
+- Control de **clientes**
+- Gestión de **compras y stock**
+- Dashboards y reportes
 
-Cómo usar (desarrollo local)
-----------------------------
+---
 
-1. Instalar dependencias:
+## El Problema que Resolvemos
+
+Muchas MYPES en Perú:
+
+- No registran ni gestionan correctamente sus transacciones
+- No tienen control de inventario o clientes
+- No pueden acceder a herramientas digitales por costos o complejidad
+- Dependen de procesos manuales propensos a errores
+
+**Nuestra solución:** Un panel admin configurable + un constructor visual que genera instancias funcionales y personalizadas sin desarrollo largo ni costoso.
+
+---
+
+## Stack Tecnológico
+
+### Frontend (este repositorio)
+
+| Tecnología | Propósito |
+|---|---|
+| **React 19** | Framework UI principal |
+| **TypeScript** | Tipado estático |
+| **Vite** | Bundler y dev server |
+| **Tailwind CSS 4** | Estilos utilitarios |
+| **Radix UI** | Componentes accesibles (dialog, select, toast, etc.) |
+| **Framer Motion** | Animaciones |
+| **React Router 7** | Enrutamiento |
+| **React Hook Form + Zod** | Formularios con validación |
+| **Supabase** | Auth y base de datos |
+| **Axios** | Cliente HTTP |
+| **i18next** | Internacionalización (ES/EN) |
+| **Lucide React** | Iconos |
+| **Sonner** | Notificaciones/toasts |
+
+### Herramientas de Desarrollo
+
+| Herramienta | Propósito |
+|---|---|
+| **Storybook** | Documentación y desarrollo de componentes UI |
+| **Playwright** | Tests E2E |
+| **ESLint** | Linting y calidad de código |
+| **PWA Plugin** | Soporte offline / instalable |
+
+### Backend e Infraestructura (planificado)
+
+- **Node.js** — Motor de generación de instancias
+- **Supabase** — Auth, base de datos, storage
+- **Docker** — Containerización y despliegue
+
+---
+
+## Arquitectura del Proyecto
+
+```
+saas-orchestrator/
+├── src/
+│   ├── components/
+│   │   ├── shared/      # Componentes reutilizables (Navbar, DataTable, Loaders...)
+│   │   └── ui/          # Componentes base del Design System (Button, Card, Input...)
+│   ├── contexts/        # Contextos globales (Auth, Theme)
+│   ├── hooks/           # Hooks personalizados (ErrorHandler, Performance, Network)
+│   ├── i18n/            # Traducciones (es.json, en.json)
+│   ├── lib/             # Utilidades (API, validaciones, logger, config)
+│   ├── pages/           # Páginas de la app (Login, Dashboard, Generator)
+│   ├── services/        # Servicios externos (Analytics, WebSocket)
+│   ├── stories/         # Stories de Storybook
+│   ├── types/           # Tipos TypeScript
+│   ├── App.tsx          # Configuración de rutas
+│   └── main.tsx         # Entry point
+├── e2e/                 # Tests E2E con Playwright
+├── .storybook/          # Configuración de Storybook
+└── public/              # Assets estáticos
+```
+
+---
+
+## Funcionalidades Implementadas
+
+### Críticas
+- [x] **Autenticación UI** — LoginPage con validación de formularios
+- [x] **Validación con Zod** — Schemas para login, deploy y portal
+- [x] **Manejo de errores** — Hook centralizado con toasts (sonner)
+- [x] **Loaders** — LoadingOverlay, LoadingScreen, Suspense en rutas lazy
+- [x] **Responsive** — MobileNav animado, breakpoints mejorados
+
+### Alta Prioridad
+- [x] **Design System + Storybook** — Componentes documentados (Button, Card, Badge)
+- [x] **Constructor visual** — GeneratorPage con analytics y validación
+- [x] **DataTable genérico** — Búsqueda, filtrado y skeletons
+
+### Media Prioridad
+- [x] **Tests E2E** — Playwright configurado con suites de prueba
+- [x] **Observabilidad** — Logger multinivel + Analytics con batching
+- [x] **Internacionalización** — Soporte español/inglés
+- [x] **Performance** — Lazy loading + Suspense en rutas
+
+### Baja Prioridad (en progreso)
+- [ ] **WebSockets** — Reconexión exponencial y sistema de eventos
+- [ ] **Modo offline** — PWA con service worker
+- [ ] **Visual regression** — Chromatic + Playwright snapshots
+
+---
+
+## Cómo Empezar
+
+### Requisitos
+
+- **Node.js** >= 20
+- **npm** >= 10
+
+### Instalación
 
 ```bash
+# 1. Clonar el repositorio
+git clone <url-del-repo>
 cd saas-orchestrator
+
+# 2. Instalar dependencias
 npm install
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Editar .env con las credenciales reales de Supabase y API
 ```
 
-2. Ejecutar en modo desarrollo:
+### Scripts Disponibles
 
-```bash
-npm run dev
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Iniciar servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run preview` | Preview del build |
+| `npm run lint` | Ejecutar linter |
+| `npm run storybook` | Iniciar Storybook (localhost:6006) |
+| `npm run test:e2e` | Ejecutar tests E2E |
+| `npm run test:e2e:ui` | Tests E2E con interfaz visual |
+
+---
+
+## Convenciones de Desarrollo
+
+### Git Flow
+
+- **main** — Código estable en producción
+- **develop** — Rama de integración
+- **feature/nombre** — Ramas para nuevas funcionalidades
+- **fix/nombre** — Ramas para correcciones
+
+### Commits
+
+Usar commits semánticos:
+
+```
+feat: agregar validación de RUC en formularios
+fix: corregir responsive en Navbar
+docs: actualizar README con instrucciones
+style: ajustar colores del design system
+test: agregar tests E2E para login
 ```
 
-3. Build de producción:
+### Pull Requests
 
-```bash
-npm run build
-```
+- Todo PR debe apuntar a `develop`
+- Requiere al menos **1 review** antes de merge
+- Debe pasar **lint** y **build** antes de revisar
+- Incluir screenshots o videos si hay cambios UI
 
-Cambios y trabajo realizado (resumen)
------------------------------------
+---
 
-He actualizado la documentación y añadido un resumen de los cambios y recomendaciones front-end realizadas durante la revisión. Cambios y artefactos generados en esta sesión:
+## Roadmap
 
-- Creación y cierre de una lista de tareas de revisión front-end (plan breve) usando la herramienta de gestión de tareas interna.
-- Identificación de faltantes y mejoras UI/UX: onboarding, constructor visual paso a paso, validación de formularios, accesibilidad, responsive, design system, toasts y loaders, tablas con búsqueda/filtrado, dashboards, etc.
-- Priorización de mejoras (Crítica / Alta / Media / Baja) para implementar de forma incremental.
-- Recomendaciones prácticas: añadir Storybook, pruebas unitarias y E2E, observabilidad (Sentry), y no incluir secretos en el repositorio (`.env.example` sin claves).
+### Fase 1 — Base (actual)
+- [x] Setup del proyecto con Vite + React + TypeScript
+- [x] Design System básico con Storybook
+- [x] Autenticación UI
+- [x] Constructor visual (GeneratorPage)
+- [x] DataTable genérico
 
-No se han modificado archivos fuente del frontend en este cambio —solo se documentó la revisión y las recomendaciones. Si quieres que implemente alguno de los ítems (por ejemplo: validación de formularios en `src/components`, agregar Storybook o añadir toasts), indícame cuál y lo implemento.
+### Fase 2 — Consolidación
+- [ ] Auth funcional con Supabase
+- [ ] Rutas protegidas implementadas
+- [ ] Dashboard con métricas reales
+- [ ] Formularios con validación completa (RUC, moneda PEN)
+- [ ] Tests E2E para flujos principales
 
-Próximos pasos sugeridos
------------------------
+### Fase 3 — Backend
+- [ ] Motor de generación en Node.js
+- [ ] API REST para gestión de instancias
+- [ ] Integración completa con Supabase
+- [ ] Dockerización del proyecto
 
-- Implementar autenticación UI y rutas protegidas (`src/contexts/AuthContext.tsx` y `src/components/shared/ProtectedRoute.tsx`).
-- Crear un pequeño Design System y documentarlo en Storybook.
-- Añadir validación de formularios y máscaras para datos locales (RUC, moneda PEN).
-- Añadir tests E2E básicos (Playwright/Cypress) para el flujo de login y dashboard.
+### Fase 4 — Producción
+- [ ] Deploy a producción
+- [ ] Monitoreo y observabilidad (Sentry)
+- [ ] PWA funcional con modo offline
+- [ ] Documentación para usuarios finales
 
-Cambios aplicados en esta sesión (detallado)
------------------------------------------
+---
 
-Crítica
-- Auth UI — `LoginPage` mejorada con `react-hook-form` + `zodResolver`
-- Form validation — Schemas `loginSchema`, `deploySchema`, `portalSchema` en `src/lib/validations.ts`
-- Toasts/Errores — `useErrorHandler` hook centralizado con `sonner` (`src/hooks/useErrorHandler.ts`)
-- Loaders — `LoadingOverlay`, `LoadingScreen`, `Suspense` en rutas lazy
-- Responsive — `MobileNav` lateral animado, breakpoints mejorados en `Navbar` y `Layout`
+## Cómo Contribuir
 
-Alta
-- Design system + Storybook — `.storybook/` config + 3 stories (Button, Card, Badge). Run: `npm run storybook`
-- Constructor visual UX — `GeneratorPage` con Analytics tracking, validación Zod, animaciones mejoradas
-- DataTable — Componente genérico `DataTable<T>` en `src/components/shared/DataTable.tsx` con búsqueda y skeletons (usa `npm run storybook` para docs)
+1. **Revisa los issues** abiertos antes de empezar algo nuevo
+2. **Crea una rama** siguiendo la convención `feature/nombre` o `fix/nombre`
+3. **Desarrolla** siguiendo las convenciones del proyecto
+4. **Escribe tests** si es aplicable
+5. **Abre un PR** con descripción clara de los cambios
 
-Media
-- Tests E2E — Playwright config + 3 test suites (auth, dashboard, generator). Run: `npm run test:e2e`
-- Observabilidad — `src/lib/logger.ts` multinivel + `src/services/analytics.ts` con batching y Beacon API
-- i18n — `react-i18next` + `i18next-browser-languagedetector`, español/inglés en `src/i18n/`
-- Performance — `React.lazy` + `Suspense` en rutas, `usePerformanceMonitoring` hook
+### Reglas
 
-Baja
-- WebSockets — `src/services/websocket.ts` con reconexión exponencial y sistema de eventos
-- Modo offline — `vite-plugin-pwa` con service worker, runtime caching para API, `PwaRegister` component
-- Visual regression — `@chromatic-com/storybook` + Playwright snapshots listo para integrar
+- No pushear directamente a `main` o `develop`
+- No incluir secretos o credenciales en el código
+- Usar `.env` para variables locales (ya está en `.gitignore`)
+- Mantener los componentes documentados en Storybook
 
-Nota: estas entradas documentan cambios y artefactos relacionados con la revisión front-end; si quieres que implemente alguno de ellos en código ahora, indícame cuál y lo agrego.
+---
 
-Contacto rápido
----------------
+## Recursos Útiles
 
-Si quieres que aplique una mejora específica ahora, dime cuál y la implemento (ej.: `validación de formularios`, `Storybook`, `toasts` o `ProtectedRoute`).
+- **Documentación de React**: https://react.dev
+- **Tailwind CSS**: https://tailwindcss.com
+- **Radix UI**: https://www.radix-ui.com
+- **Supabase**: https://supabase.com/docs
+- **Zod**: https://zod.dev
 
+---
+
+## Equipo
+
+| Rol | Responsabilidad |
+|---|---|
+| Frontend | React, UI/UX, componentes |
+| Backend | Motor de generación, API |
+| DevOps | Docker, deploy, CI/CD |
+| QA | Tests, validación |
+
+---
+
+## Contacto
+
+Para dudas, sugerencias o para asignarte una tarea, contactar al equipo por Discord.
+
+---
+
+> *"Digitalizar MYPES es democratizar la tecnología"*
