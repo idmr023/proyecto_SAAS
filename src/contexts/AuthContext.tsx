@@ -1,69 +1,102 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import type { Session, User } from "@supabase/supabase-js"
+import { createContext, useContext, useState, type ReactNode } from "react"
 import { supabase, IS_DEMO } from "@/lib/config"
+import { toast } from "sonner"
 
 interface AuthContextType {
-  session: Session | null
-  user: User | null
+  session: boolean
+  user: { email: string; id: string; name?: string } | null
   loading: boolean
   isDemo: boolean
   signIn: (email: string, password: string) => Promise<string | null>
+  verifyMfa: (code: string) => Promise<string | null>
   signOut: () => Promise<void>
+  mfaPending: boolean
+  setMfaPending: (v: boolean) => void
+  pendingEmail: string
 }
+
+const AUTH_KEY = "saas_orchestrator_session"
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (IS_DEMO || !supabase) {
-      setLoading(false)
-      return
+  const [session, setSession] = useState<boolean>(() => {
+    const stored = localStorage.getItem(AUTH_KEY)
+    if (stored) {
+      try {
+        JSON.parse(stored)
+        return true
+      } catch {
+        localStorage.removeItem(AUTH_KEY)
+      }
     }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
+    return false
+  })
+  const [user, setUser] = useState<{ email: string; id: string; name?: string } | null>(() => {
+    const stored = localStorage.getItem(AUTH_KEY)
+    if (stored) {
+      try {
+        return JSON.parse(stored)
+      } catch {
+        localStorage.removeItem(AUTH_KEY)
+      }
+    }
+    return null
+  })
+  const [loading] = useState(false)
+  const [mfaPending, setMfaPending] = useState(false)
+  const [pendingEmail, setPendingEmail] = useState("")
 
   const signIn = async (email: string, _password: string): Promise<string | null> => {
     if (IS_DEMO || !supabase) {
-      setUser({ email, id: "demo-user-id" } as User)
-      setSession({ user: { email, id: "demo-user-id" } } as Session)
+      setPendingEmail(email)
+      setMfaPending(true)
+      toast.success("Código enviado a " + email)
       return null
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password: _password })
-    return error?.message ?? null
+    if (error) return error.message
+
+    setPendingEmail(email)
+    setMfaPending(true)
+    toast.success("Código enviado a " + email)
+    return null
+  }
+
+  const verifyMfa = async (code: string): Promise<string | null> => {
+    if (code !== "123456" && IS_DEMO) {
+      return "Código inválido"
+    }
+
+    const userData = { email: pendingEmail, id: "user-" + Date.now(), name: pendingEmail.split("@")[0] }
+    localStorage.setItem(AUTH_KEY, JSON.stringify(userData))
+    setUser(userData)
+    setSession(true)
+    setMfaPending(false)
+    setPendingEmail("")
+    return null
   }
 
   const signOut = async () => {
     if (!IS_DEMO && supabase) {
       await supabase.auth.signOut()
     }
-    setSession(null)
+    localStorage.removeItem(AUTH_KEY)
+    setSession(false)
     setUser(null)
+    setMfaPending(false)
+    setPendingEmail("")
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, isDemo: IS_DEMO, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, loading, isDemo: IS_DEMO, signIn, verifyMfa, signOut, mfaPending, setMfaPending, pendingEmail }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error("useAuth must be used within AuthProvider")
