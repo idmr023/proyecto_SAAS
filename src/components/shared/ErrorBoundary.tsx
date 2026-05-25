@@ -1,6 +1,7 @@
 import { Component, type ReactNode, type ErrorInfo } from "react"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle } from "lucide-react"
+import { logger } from "@/lib/logger"
 
 interface Props {
   children: ReactNode
@@ -23,7 +24,10 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("ErrorBoundary caught:", error, info)
+    logger.error("ErrorBoundary caught", {
+      error: error.message,
+      componentStack: info.componentStack ?? "",
+    })
   }
 
   handleReset = () => {
