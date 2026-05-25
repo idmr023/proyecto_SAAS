@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import {
   Container,
   LayoutDashboard,
-  Box,
+  Building2,
+  Plus,
   LogOut,
   Moon,
   Sun,
@@ -18,7 +19,8 @@ import { motion, AnimatePresence } from "framer-motion"
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/generator", label: "Generador", icon: Box },
+  { to: "/empresas/control", label: "Empresas", icon: Building2 },
+  { to: "/empresas/nuevo", label: "Nueva Empresa", icon: Plus },
 ]
 
 export default function MobileNav() {
@@ -63,7 +65,7 @@ export default function MobileNav() {
             >
               <div className="flex items-center justify-between border-b px-4 h-14">
                 <div className="flex items-center gap-2 font-semibold">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white">
                     <Container className="h-4 w-4" />
                   </div>
                   <span>SaaS</span>

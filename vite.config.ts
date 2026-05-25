@@ -15,7 +15,7 @@ export default defineConfig({
         name: 'SaaS Orchestrator',
         short_name: 'SaaS',
         description: 'Panel de orquestación SaaS',
-        theme_color: '#1a1a2e',
+        theme_color: '#1E3A8A',
         background_color: '#ffffff',
         display: 'standalone',
         icons: [

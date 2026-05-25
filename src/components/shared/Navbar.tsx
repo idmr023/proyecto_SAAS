@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import {
   Container,
   LayoutDashboard,
-  Box,
+  Building2,
+  Plus,
   LogOut,
   Moon,
   Sun,
@@ -16,7 +17,8 @@ import { useTranslation } from "react-i18next"
 
 const navItems = [
   { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
-  { to: "/generator", labelKey: "nav.generator", icon: Box },
+  { to: "/empresas/control", labelKey: "nav.empresas", icon: Building2 },
+  { to: "/empresas/nuevo", labelKey: "nav.nueva_empresa", icon: Plus },
 ]
 
 export default function Navbar() {
@@ -35,7 +37,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
       <div className="flex h-14 items-center px-4 lg:px-6">
         <Link to="/dashboard" className="flex items-center gap-2 font-semibold mr-4 lg:mr-8">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm">
             <Container className="h-4 w-4" />
           </div>
           <span className="hidden sm:inline">{t("app.name")}</span>
