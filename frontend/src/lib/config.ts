@@ -29,13 +29,29 @@ export const dockerOrchestrator = axios.create({
   },
 })
 
+dockerOrchestrator.interceptors.request.use((config) => {
+  const stored = localStorage.getItem("saas_orchestrator_session")
+  if (stored) {
+    try {
+      const data = JSON.parse(stored)
+      if (data.token) {
+        config.headers.Authorization = `Bearer ${data.token}`
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return config
+})
+
 dockerOrchestrator.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
       const { status } = error.response
       if (status === 401) {
-        console.warn("Docker Orchestrator: Unauthorized")
+        localStorage.removeItem("saas_orchestrator_session")
+        window.location.href = "/login"
       } else if (status === 403) {
         console.warn("Docker Orchestrator: Forbidden")
       } else if (status >= 500) {

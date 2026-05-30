@@ -1,6 +1,6 @@
 # SaaS Orchestrator
 
-> Panel Administrativo para digitalización de MYPES
+> Panel Administrativo para digitalización de MYPES — *Actualizado: 30 de mayo de 2026*
 
 ---
 
@@ -32,7 +32,7 @@ Muchas MYPES en Perú:
 
 ## Stack Tecnológico
 
-### Frontend (este repositorio)
+### Frontend
 
 | Tecnología | Propósito |
 |---|---|
@@ -45,10 +45,24 @@ Muchas MYPES en Perú:
 | **React Router 7** | Enrutamiento |
 | **React Hook Form + Zod** | Formularios con validación |
 | **Supabase** | Auth y base de datos |
-| **Axios** | Cliente HTTP |
+| **Axios** | Cliente HTTP con interceptor JWT |
 | **i18next** | Internacionalización (ES/EN) |
 | **Lucide React** | Iconos |
 | **Sonner** | Notificaciones/toasts |
+
+### Backend
+
+| Tecnología | Propósito |
+|---|---|
+| **Node.js + TypeScript** | Motor API REST |
+| **Express** | Framework HTTP |
+| **Prisma ORM** | Modelado y conexión a base de datos |
+| **PostgreSQL (Supabase)** | Base de datos principal |
+| **JWT + bcrypt** | Autenticación segura |
+| **Helmet** | Seguridad HTTP (anti-clickjacking, XSS) |
+| **express-rate-limit** | Protección contra fuerza bruta |
+| **Zod** | Validación de schemas en endpoints |
+| **Docker CLI** | Orquestación de contenedores |
 
 ### Herramientas de Desarrollo
 
@@ -59,63 +73,103 @@ Muchas MYPES en Perú:
 | **ESLint** | Linting y calidad de código |
 | **PWA Plugin** | Soporte offline / instalable |
 
-### Backend e Infraestructura (planificado)
-
-- **Node.js** — Motor de generación de instancias
-- **Supabase** — Auth, base de datos, storage
-- **Docker** — Containerización y despliegue
-
 ---
 
 ## Arquitectura del Proyecto
 
 ```
 saas-orchestrator/
-├── src/
-│   ├── components/
-│   │   ├── shared/      # Componentes reutilizables (Navbar, DataTable, Loaders...)
-│   │   └── ui/          # Componentes base del Design System (Button, Card, Input...)
-│   ├── contexts/        # Contextos globales (Auth, Theme)
-│   ├── hooks/           # Hooks personalizados (ErrorHandler, Performance, Network)
-│   ├── i18n/            # Traducciones (es.json, en.json)
-│   ├── lib/             # Utilidades (API, validaciones, logger, config)
-│   ├── pages/           # Páginas de la app (Login, Dashboard, Generator)
-│   ├── services/        # Servicios externos (Analytics, WebSocket)
-│   ├── stories/         # Stories de Storybook
-│   ├── types/           # Tipos TypeScript
-│   ├── App.tsx          # Configuración de rutas
-│   └── main.tsx         # Entry point
-├── e2e/                 # Tests E2E con Playwright
-├── .storybook/          # Configuración de Storybook
-└── public/              # Assets estáticos
+├── frontend/                    # Aplicación React (Vite + Tailwind + Shadcn)
+│   ├── src/
+│   │   ├── components/         # Componentes reutilizables
+│   │   ├── contexts/           # Contextos de React (AuthContext)
+│   │   ├── pages/              # Páginas de la aplicación
+│   │   ├── i18n/               # Traducciones español/inglés
+│   │   ├── lib/                # Configuración Axios, API calls
+│   │   └── types/              # Interfaces de TypeScript
+│   ├── .storybook/             # Configuración Storybook v10
+│   ├── public/                 # Assets estáticos
+│   ├── e2e/                    # Tests Playwright
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── .env.example
+├── backend/                     # API REST (Node.js + Express + TypeScript)
+│   ├── prisma/
+│   │   └── schema.prisma       # Esquema de base de datos
+│   ├── src/
+│   │   ├── config/             # Configuración (env, database)
+│   │   ├── controllers/        # Controladores de rutas
+│   │   ├── middleware/         # Middleware de autenticación
+│   │   ├── routes/             # Definición de rutas Express
+│   │   ├── services/           # Lógica de negocio (OTP, Docker)
+│   │   └── types/              # Tipos compartidos
+│   ├── .env.example
+│   ├── package.json
+│   └── tsconfig.json
+├── AGENTS.md                    # Memoria maestra del proyecto
+└── README.md
 ```
+
+---
+
+## Seguridad Implementada
+
+| Medida | Descripción |
+|---|---|
+| **Helmet** | Protege contra clickjacking, XSS, MIME sniffing |
+| **Rate Limiting** | 10 intentos máximo por 15 min en `/api/auth/login` |
+| **CORS Restringido** | Solo localhost:5173 en dev, solo `.ripnel.app` en prod |
+| **JWT en Rutas Protegidas** | Todas las rutas `/api/orchestrator/*` requieren Bearer token |
+| **Auto-logout en 401** | Interceptor de Axios redirige a `/login` si token expira |
+| **Validación Zod** | Todos los endpoints validan schemas de entrada |
+| **Códigos HTTP Semánticos** | 400, 401, 403, 404, 409, 500 según el caso |
+| **Límite Payload** | 1MB máximo en body de solicitudes Express |
+
+---
+
+## API Endpoints
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/auth/login` | Validar credenciales y generar OTP |
+| POST | `/api/auth/verify-mfa` | Validar código OTP y emitir JWT |
+| POST | `/api/orchestrator/deploy` | Desplegar nueva empresa en Docker |
+| GET | `/api/orchestrator/status` | Estado de todas las empresas |
+| POST | `/api/orchestrator/stop/:id` | Detener contenedor de empresa |
+| POST | `/api/orchestrator/start/:id` | Iniciar contenedor de empresa |
+| POST | `/api/orchestrator/restart/:id` | Reiniciar contenedor de empresa |
+| GET | `/api/orchestrator/logs/:id` | Obtener logs del contenedor |
+| GET | `/api/health` | Health check del servidor |
 
 ---
 
 ## Funcionalidades Implementadas
 
-### Críticas
-- [x] **Autenticación UI** — LoginPage con validación de formularios
-- [x] **Validación con Zod** — Schemas para login, deploy y portal
-- [x] **Manejo de errores** — Hook centralizado con toasts (sonner)
-- [x] **Loaders** — LoadingOverlay, LoadingScreen, Suspense en rutas lazy
-- [x] **Responsive** — MobileNav animado, breakpoints mejorados
-
-### Alta Prioridad
+### Frontend
+- [x] **Autenticación 2-step** — Login con email/password + MFA (OTP 6 dígitos)
+- [x] **Dashboard** — KPI cards, gráfico PieChart (Recharts), mapa regional SVG
+- [x] **Constructor visual** — Stepper 3 pasos con selección de módulos y deploy simulado
+- [x] **Sala de monitoreo** — Grid de empresas con ping, acciones (stop/start/restart) y logs
 - [x] **Design System + Storybook** — Componentes documentados (Button, Card, Badge)
-- [x] **Constructor visual** — GeneratorPage con analytics y validación
-- [x] **DataTable genérico** — Búsqueda, filtrado y skeletons
-
-### Media Prioridad
-- [x] **Tests E2E** — Playwright configurado con suites de prueba
-- [x] **Observabilidad** — Logger multinivel + Analytics con batching
 - [x] **Internacionalización** — Soporte español/inglés
-- [x] **Performance** — Lazy loading + Suspense en rutas
+- [x] **Validación con Zod** — Schemas para formularios
+- [x] **Responsive** — MobileNav animado, breakpoints mejorados
+- [x] **Modo demo** — Funciona sin Supabase ni backend
 
-### Baja Prioridad (en progreso)
-- [ ] **WebSockets** — Reconexión exponencial y sistema de eventos
-- [ ] **Modo offline** — PWA con service worker
-- [ ] **Visual regression** — Chromatic + Playwright snapshots
+### Backend
+- [x] **API REST completa** — 9 endpoints con Express + TypeScript
+- [x] **Autenticación segura** — bcrypt + JWT + OTP con expiración
+- [x] **Prisma ORM** — 4 modelos (Admin, MypeEmpresa, ConfiguracionModulos, ContenedorLog)
+- [x] **Orquestación Docker** — Deploy, stop, start, restart, logs via Docker CLI
+- [x] **Seguridad** — Helmet, rate limiting, CORS, Zod, límite payload
+
+### En Progreso
+- [ ] Conectar páginas a API real (actualmente usan datos mock)
+- [ ] Seed de base de datos para pruebas
+- [ ] Webhooks / WebSockets para logs en tiempo real
+- [ ] Tests E2E completos
 
 ---
 
@@ -125,6 +179,7 @@ saas-orchestrator/
 
 - **Node.js** >= 20
 - **npm** >= 10
+- **Docker** (para orquestación de contenedores)
 
 ### Instalación
 
@@ -133,15 +188,24 @@ saas-orchestrator/
 git clone <url-del-repo>
 cd saas-orchestrator
 
-# 2. Instalar dependencias
+# 2. Instalar dependencias del frontend
+cd frontend
 npm install
-
-# 3. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con las credenciales reales de Supabase y API
+
+# 3. Instalar dependencias del backend
+cd ../backend
+npm install
+cp .env.example .env
+# Editar .env con credenciales reales de Supabase y JWT_SECRET
+
+# 4. Generar Prisma Client
+npx prisma generate
 ```
 
 ### Scripts Disponibles
+
+#### Frontend (desde `frontend/`)
 
 | Comando | Descripción |
 |---|---|
@@ -151,7 +215,16 @@ cp .env.example .env
 | `npm run lint` | Ejecutar linter |
 | `npm run storybook` | Iniciar Storybook (localhost:6006) |
 | `npm run test:e2e` | Ejecutar tests E2E |
-| `npm run test:e2e:ui` | Tests E2E con interfaz visual |
+
+#### Backend (desde `backend/`)
+
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Iniciar servidor con hot-reload |
+| `npm run build` | Compilar TypeScript a JS |
+| `npm start` | Iniciar servidor en producción |
+| `npm run prisma:push` | Sincronizar schema con base de datos |
+| `npm run prisma:studio` | Abrir Prisma Studio (GUI de BD) |
 
 ---
 
@@ -187,28 +260,29 @@ test: agregar tests E2E para login
 
 ## Roadmap
 
-### Fase 1 — Base (actual)
+### Fase 1 — Base (completada)
 - [x] Setup del proyecto con Vite + React + TypeScript
 - [x] Design System básico con Storybook
-- [x] Autenticación UI
+- [x] Autenticación UI con MFA simulado
 - [x] Constructor visual (GeneratorPage)
-- [x] DataTable genérico
+- [x] Dashboard con gráficos Recharts
+- [x] Sala de monitoreo de empresas
 
-### Fase 2 — Consolidación
-- [ ] Auth funcional con Supabase
-- [ ] Rutas protegidas implementadas
-- [ ] Dashboard con métricas reales
-- [ ] Formularios con validación completa (RUC, moneda PEN)
-- [ ] Tests E2E para flujos principales
+### Fase 2 — Backend (completada)
+- [x] API REST con Node.js + Express + TypeScript
+- [x] Autenticación real con JWT + bcrypt + OTP
+- [x] Prisma ORM con modelos Admin, Empresa, Módulos, Logs
+- [x] Orquestación Docker CLI
+- [x] Seguridad: Helmet, rate limit, CORS, Zod
 
-### Fase 3 — Backend
-- [ ] Motor de generación en Node.js
-- [ ] API REST para gestión de instancias
-- [ ] Integración completa con Supabase
-- [ ] Dockerización del proyecto
+### Fase 3 — Integración
+- [ ] Conectar frontend a API real (reemplazar datos mock)
+- [ ] Seed de base de datos para desarrollo
+- [ ] WebSockets para logs en tiempo real
+- [ ] Tests E2E para flujo completo
 
 ### Fase 4 — Producción
-- [ ] Deploy a producción
+- [ ] Deploy a Ripnel
 - [ ] Monitoreo y observabilidad (Sentry)
 - [ ] PWA funcional con modo offline
 - [ ] Documentación para usuarios finales
@@ -238,6 +312,7 @@ test: agregar tests E2E para login
 - **Tailwind CSS**: https://tailwindcss.com
 - **Radix UI**: https://www.radix-ui.com
 - **Supabase**: https://supabase.com/docs
+- **Prisma**: https://prisma.io/docs
 - **Zod**: https://zod.dev
 
 ---
@@ -247,15 +322,9 @@ test: agregar tests E2E para login
 | Rol | Responsabilidad |
 |---|---|
 | Frontend | React, UI/UX, componentes |
-| Backend | Motor de generación, API |
+| Backend | Motor de generación, API, seguridad |
 | DevOps | Docker, deploy, CI/CD |
 | QA | Tests, validación |
-
----
-
-## Contacto
-
-Para dudas, sugerencias o para asignarte una tarea, contactar al equipo por Discord.
 
 ---
 

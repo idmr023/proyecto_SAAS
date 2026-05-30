@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react"
-import { supabase, IS_DEMO } from "@/lib/config"
+import { supabase, IS_DEMO, dockerOrchestrator } from "@/lib/config"
 import { toast } from "sonner"
 
 interface AuthContextType {
@@ -24,8 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(AUTH_KEY)
     if (stored) {
       try {
-        JSON.parse(stored)
-        return true
+        const data = JSON.parse(stored)
+        return !!data.token
       } catch {
         localStorage.removeItem(AUTH_KEY)
       }
@@ -36,7 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(AUTH_KEY)
     if (stored) {
       try {
-        return JSON.parse(stored)
+        const data = JSON.parse(stored)
+        return data.admin || null
       } catch {
         localStorage.removeItem(AUTH_KEY)
       }
@@ -47,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [mfaPending, setMfaPending] = useState(false)
   const [pendingEmail, setPendingEmail] = useState("")
 
-  const signIn = async (email: string, _password: string): Promise<string | null> => {
+  const signIn = async (email: string, password: string): Promise<string | null> => {
     if (IS_DEMO || !supabase) {
       setPendingEmail(email)
       setMfaPending(true)
@@ -55,7 +56,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password: _password })
+    try {
+      const res = await dockerOrchestrator.post("/api/auth/login", { email, password })
+      if (res.data.mfaRequired) {
+        setPendingEmail(email)
+        setMfaPending(true)
+        toast.success("Código enviado a " + email)
+        return null
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err.message || "Error al iniciar sesión"
+      return msg
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) return error.message
 
     setPendingEmail(email)
@@ -65,13 +79,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const verifyMfa = async (code: string): Promise<string | null> => {
-    if (code !== "123456" && IS_DEMO) {
+    if (!pendingEmail) return "No hay sesión pendiente"
+
+    if (!IS_DEMO) {
+      try {
+        const res = await dockerOrchestrator.post("/api/auth/verify-mfa", {
+          email: pendingEmail,
+          code,
+        })
+        if (res.data.token) {
+          const data = { token: res.data.token, admin: res.data.admin }
+          localStorage.setItem(AUTH_KEY, JSON.stringify(data))
+          setUser(res.data.admin)
+          setSession(true)
+          setMfaPending(false)
+          setPendingEmail("")
+          return null
+        }
+      } catch (err: any) {
+        const msg = err?.response?.data?.error || "Código inválido o expirado"
+        return msg
+      }
+    }
+
+    if (code !== "123456") {
       return "Código inválido"
     }
 
-    const userData = { email: pendingEmail, id: "user-" + Date.now(), name: pendingEmail.split("@")[0] }
-    localStorage.setItem(AUTH_KEY, JSON.stringify(userData))
-    setUser(userData)
+    const adminData = {
+      email: pendingEmail,
+      id: "demo-" + Date.now(),
+      name: pendingEmail.split("@")[0],
+    }
+    const data = { token: "demo-token-" + Date.now(), admin: adminData }
+    localStorage.setItem(AUTH_KEY, JSON.stringify(data))
+    setUser(adminData)
     setSession(true)
     setMfaPending(false)
     setPendingEmail("")
