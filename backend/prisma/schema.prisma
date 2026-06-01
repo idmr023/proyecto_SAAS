@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  passwordHash   String
+  nombre         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  empresas       MypeEmpresa[]
+}
+
+model MypeEmpresa {
+  id             String   @id @default(uuid())
+  adminId        String
+  nombre         String
+  rubro          String
+  subdominio     String   @unique
+  estado         String   @default("activa") // activa, detenida, error
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  admin          Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  modulos        ConfiguracionModulos[]
+  contenedores   ContenedorLog[]
+}
+
+model ConfiguracionModulos {
+  id             String   @id @default(uuid())
+  empresaId      String
+  modulo         String   // inventarios, ventas, restaurantes, nomina, contabilidad, CRM
+  activo         Boolean  @default(false)
+  config         Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  empresa        MypeEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([empresaId, modulo])
+}
+
+model ContenedorLog {
+  id             String   @id @default(uuid())
+  empresaId      String
+  contenedorId   String?
+  imagen         String
+  puerto         Int?
+  estado         String   // running, stopped, error
+  mensaje        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  empresa        MypeEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+}

@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AuthProvider } from "@/contexts/AuthContext"
 import { ThemeProvider } from "@/contexts/ThemeContext"
 import ErrorBoundary from "@/components/shared/ErrorBoundary"
-import ProtectedRoute from "@/components/shared/ProtectedRoute"
 import Navbar from "@/components/shared/Navbar"
 import LoadingScreen from "@/components/shared/LoadingScreen"
 import { motion, AnimatePresence } from "framer-motion"
@@ -29,33 +28,31 @@ export default function App() {
                   </Suspense>
                 }
               />
-              <Route element={<ProtectedRoute />}>
-                <Route element={<Layout />}>
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <Suspense fallback={<LoadingScreen />}>
-                        <DashboardPage />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="/empresas/nuevo"
-                    element={
-                      <Suspense fallback={<LoadingScreen />}>
-                        <GeneratorPage />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="/empresas/control"
-                    element={
-                      <Suspense fallback={<LoadingScreen />}>
-                        <EmpresasControlPage />
-                      </Suspense>
-                    }
-                  />
-                </Route>
+              <Route element={<Layout />}>
+                <Route
+                  path="/dashboard"
+                  element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <DashboardPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/empresas/nuevo"
+                  element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <GeneratorPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/empresas/control"
+                  element={
+                    <Suspense fallback={<LoadingScreen />}>
+                      <EmpresasControlPage />
+                    </Suspense>
+                  }
+                />
               </Route>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route
