@@ -49,7 +49,7 @@ dockerOrchestrator.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status } = error.response
-      if (status === 401) {
+      if (status === 401 && !IS_DEMO) {
         localStorage.removeItem("saas_orchestrator_session")
         window.location.href = "/login"
       } else if (status === 403) {

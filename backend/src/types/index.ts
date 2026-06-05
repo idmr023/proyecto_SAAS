@@ -1,8 +1,11 @@
 import { Request } from 'express';
 
+export type UserRole = 'admin' | 'colaborador';
+
 export interface JWTPayload {
   adminId: string;
   email: string;
+  role: UserRole;
 }
 
 export interface AuthRequest extends Request {

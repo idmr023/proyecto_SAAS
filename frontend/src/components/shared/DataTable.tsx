@@ -51,9 +51,16 @@ export default function DataTable<T>({
     }
   }
 
-  const displayData = data
-
-
+  const displayData = onSearch
+    ? data
+    : data.filter((item: any) => {
+        if (!searchValue) return true
+        const query = searchValue.toLowerCase()
+        return columns.some((col) => {
+          const val = item[col.key]
+          return val != null && String(val).toLowerCase().includes(query)
+        })
+      })
 
   return (
     <div className="space-y-3">

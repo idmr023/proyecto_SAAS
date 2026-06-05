@@ -21,3 +21,11 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     res.status(401).json({ error: 'Token inválido o expirado' });
   }
 }
+
+export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction): void {
+  if (!req.admin || req.admin.role !== 'admin') {
+    res.status(403).json({ error: 'Acceso denegado. Se requiere rol de administrador.' });
+    return;
+  }
+  next();
+}
