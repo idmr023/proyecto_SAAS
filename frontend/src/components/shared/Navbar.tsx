@@ -11,6 +11,8 @@ import {
   Moon,
   Sun,
   Sparkles,
+  TicketCheck,
+  Eye,
 } from "lucide-react"
 import MobileNav from "@/components/shared/MobileNav"
 import { useTranslation } from "react-i18next"
@@ -19,6 +21,7 @@ const navItems = [
   { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
   { to: "/empresas/control", labelKey: "nav.empresas", icon: Building2 },
   { to: "/empresas/nuevo", labelKey: "nav.nueva_empresa", icon: Plus },
+  { to: "/tickets", labelKey: "nav.tickets", icon: TicketCheck },
 ]
 
 export default function Navbar() {
@@ -30,7 +33,7 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate("/login")
+    navigate("/")
   }
 
   return (
@@ -64,6 +67,13 @@ export default function Navbar() {
               </Button>
             )
           })}
+          <div className="w-px h-5 bg-border mx-1" />
+          <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground">
+            <Link to="/">
+              <Eye className="h-4 w-4" />
+              <span className="hidden lg:inline">{t("nav.cliente")}</span>
+            </Link>
+          </Button>
         </nav>
 
         <div className="ml-auto flex items-center gap-1.5">
@@ -76,7 +86,13 @@ export default function Navbar() {
             </span>
           )}
 
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex h-8 w-8" onClick={toggle}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden sm:inline-flex h-8 w-8"
+            onClick={toggle}
+            aria-label={theme === "light" ? t("nav.toggle_dark") : t("nav.toggle_light")}
+          >
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
 
@@ -89,6 +105,7 @@ export default function Navbar() {
             size="icon"
             className="hidden sm:inline-flex h-8 w-8 text-muted-foreground hover:text-destructive"
             onClick={handleSignOut}
+            aria-label={t("nav.logout")}
           >
             <LogOut className="h-4 w-4" />
           </Button>

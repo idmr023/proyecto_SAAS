@@ -24,6 +24,7 @@ export const supabase = createSupabaseClient()
 export const dockerOrchestrator = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:8080",
   timeout: 30000,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -49,7 +50,7 @@ dockerOrchestrator.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status } = error.response
-      if (status === 401) {
+      if (status === 401 && !IS_DEMO) {
         localStorage.removeItem("saas_orchestrator_session")
         window.location.href = "/login"
       } else if (status === 403) {

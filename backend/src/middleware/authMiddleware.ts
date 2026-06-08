@@ -3,15 +3,26 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import type { AuthRequest, JWTPayload } from '../types/index.js';
 
-export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
+function extractToken(req: AuthRequest): string | null {
+  // 1. Try httpOnly cookie first
+  if (req.cookies?.access_token) {
+    return req.cookies.access_token;
+  }
+  // 2. Fallback to Authorization header (for transition period)
   const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+  return null;
+}
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
+  const token = extractToken(req);
+
+  if (!token) {
     res.status(401).json({ error: 'Token no proporcionado' });
     return;
   }
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
@@ -20,4 +31,12 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   } catch {
     res.status(401).json({ error: 'Token inválido o expirado' });
   }
+}
+
+export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction): void {
+  if (!req.admin || req.admin.role !== 'admin') {
+    res.status(403).json({ error: 'Acceso denegado. Se requiere rol de administrador.' });
+    return;
+  }
+  next();
 }

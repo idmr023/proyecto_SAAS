@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import { authMiddleware, requireAdmin } from '../middleware/authMiddleware.js';
 import {
   deploy,
   getStatus,
@@ -12,6 +12,7 @@ import {
 const router = Router();
 
 router.use(authMiddleware);
+router.use(requireAdmin);
 
 router.post('/deploy', deploy);
 router.get('/status', getStatus);

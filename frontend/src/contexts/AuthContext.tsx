@@ -1,10 +1,22 @@
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { supabase, IS_DEMO, dockerOrchestrator } from "@/lib/config"
 import { toast } from "sonner"
 
+export type UserRole = "admin" | "colaborador"
+
+interface StoredSession {
+  token: string
+  user: {
+    email: string
+    id: string
+    name?: string
+    role: UserRole
+  }
+}
+
 interface AuthContextType {
   session: boolean
-  user: { email: string; id: string; name?: string } | null
+  user: { email: string; id: string; name?: string; role: UserRole } | null
   loading: boolean
   isDemo: boolean
   signIn: (email: string, password: string) => Promise<string | null>
@@ -17,39 +29,77 @@ interface AuthContextType {
 
 const AUTH_KEY = "saas_orchestrator_session"
 
+function loadSession(): StoredSession | null {
+  const stored = localStorage.getItem(AUTH_KEY)
+  if (!stored) return null
+  try {
+    const parsed = JSON.parse(stored)
+    if (!parsed.user?.role) {
+      localStorage.removeItem(AUTH_KEY)
+      return null
+    }
+    return parsed
+  } catch {
+    localStorage.removeItem(AUTH_KEY)
+    return null
+  }
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<boolean>(() => {
-    const stored = localStorage.getItem(AUTH_KEY)
-    if (stored) {
-      try {
-        const data = JSON.parse(stored)
-        return !!data.token
-      } catch {
-        localStorage.removeItem(AUTH_KEY)
-      }
-    }
-    return false
-  })
-  const [user, setUser] = useState<{ email: string; id: string; name?: string } | null>(() => {
-    const stored = localStorage.getItem(AUTH_KEY)
-    if (stored) {
-      try {
-        const data = JSON.parse(stored)
-        return data.admin || null
-      } catch {
-        localStorage.removeItem(AUTH_KEY)
-      }
-    }
-    return null
-  })
-  const [loading] = useState(false)
+  const initial = loadSession()
+  const [session, setSession] = useState<boolean>(!!initial?.token)
+  const [user, setUser] = useState<{ email: string; id: string; name?: string; role: UserRole } | null>(
+    initial?.user ?? null
+  )
+  const [loading, setLoading] = useState(true)
   const [mfaPending, setMfaPending] = useState(false)
   const [pendingEmail, setPendingEmail] = useState("")
 
+  // Verificar sesión activa vía cookie/httpOnly en el backend
+  useEffect(() => {
+    if (IS_DEMO) {
+      setLoading(false)
+      return
+    }
+
+    async function checkSession() {
+      try {
+        const res = await dockerOrchestrator.get("/api/auth/session")
+        if (res.data.admin) {
+          const { id, email, role } = res.data.admin
+          const userData = { id, email, role }
+          setUser(userData)
+          setSession(true)
+          // Sincronizar localStorage con datos frescos
+          localStorage.setItem(AUTH_KEY, JSON.stringify({ token: "", user: userData }))
+        }
+      } catch {
+        // No hay sesión activa en el backend
+        localStorage.removeItem(AUTH_KEY)
+        setUser(null)
+        setSession(false)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkSession()
+  }, [])
+
   const signIn = async (email: string, password: string): Promise<string | null> => {
     if (IS_DEMO || !supabase) {
+      if (email.includes("colab")) {
+        const data: StoredSession = {
+          token: "demo-token-" + Date.now(),
+          user: { email, id: "demo-" + Date.now(), name: email.split("@")[0], role: "colaborador" },
+        }
+        localStorage.setItem(AUTH_KEY, JSON.stringify(data))
+        setUser(data.user)
+        setSession(true)
+        return null
+      }
       setPendingEmail(email)
       setMfaPending(true)
       toast.success("Código enviado a " + email)
@@ -64,18 +114,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         toast.success("Código enviado a " + email)
         return null
       }
+      if (res.data.token) {
+        const data: StoredSession = {
+          token: res.data.token,
+          user: {
+            email: res.data.admin.email,
+            id: res.data.admin.id,
+            name: res.data.admin.nombre,
+            role: res.data.admin.role,
+          },
+        }
+        localStorage.setItem(AUTH_KEY, JSON.stringify(data))
+        setUser(data.user)
+        setSession(true)
+        toast.success("Sesión iniciada")
+        return null
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.error || err.message || "Error al iniciar sesión"
       return msg
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) return error.message
-
-    setPendingEmail(email)
-    setMfaPending(true)
-    toast.success("Código enviado a " + email)
-    return null
+    return "Error inesperado"
   }
 
   const verifyMfa = async (code: string): Promise<string | null> => {
@@ -88,9 +148,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           code,
         })
         if (res.data.token) {
-          const data = { token: res.data.token, admin: res.data.admin }
+          const data: StoredSession = {
+            token: res.data.token,
+            user: {
+              email: res.data.admin.email,
+              id: res.data.admin.id,
+              name: res.data.admin.nombre,
+              role: res.data.admin.role ?? "admin",
+            },
+          }
           localStorage.setItem(AUTH_KEY, JSON.stringify(data))
-          setUser(res.data.admin)
+          setUser(data.user)
           setSession(true)
           setMfaPending(false)
           setPendingEmail("")
@@ -102,18 +170,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    if (code !== "123456") {
-      return "Código inválido"
-    }
+    if (code !== "123456") return "Código inválido"
 
-    const adminData = {
+    const role: UserRole = pendingEmail.includes("colab") ? "colaborador" : "admin"
+    const userData = {
       email: pendingEmail,
       id: "demo-" + Date.now(),
       name: pendingEmail.split("@")[0],
+      role,
     }
-    const data = { token: "demo-token-" + Date.now(), admin: adminData }
+    const data: StoredSession = { token: "demo-token-" + Date.now(), user: userData }
     localStorage.setItem(AUTH_KEY, JSON.stringify(data))
-    setUser(adminData)
+    setUser(userData)
     setSession(true)
     setMfaPending(false)
     setPendingEmail("")
@@ -121,8 +189,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
-    if (!IS_DEMO && supabase) {
-      await supabase.auth.signOut()
+    if (!IS_DEMO) {
+      try {
+        await dockerOrchestrator.post("/api/auth/logout")
+      } catch {
+        // ignore
+      }
     }
     localStorage.removeItem(AUTH_KEY)
     setSession(false)

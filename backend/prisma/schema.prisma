@@ -16,6 +16,19 @@ model Admin {
   updatedAt      DateTime @updatedAt
 
   empresas       MypeEmpresa[]
+  auditoria      AuditLog[]
+}
+
+model Colaborador {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  passwordHash   String
+  nombre         String
+  activo         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  ticketsAsignados Ticket[] @relation("TicketAsignado")
 }
 
 model MypeEmpresa {
@@ -24,19 +37,20 @@ model MypeEmpresa {
   nombre         String
   rubro          String
   subdominio     String   @unique
-  estado         String   @default("activa") // activa, detenida, error
+  estado         String   @default("activa")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   admin          Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
   modulos        ConfiguracionModulos[]
   contenedores   ContenedorLog[]
+  tickets        Ticket[]
 }
 
 model ConfiguracionModulos {
   id             String   @id @default(uuid())
   empresaId      String
-  modulo         String   // inventarios, ventas, restaurantes, nomina, contabilidad, CRM
+  modulo         String
   activo         Boolean  @default(false)
   config         Json?
   createdAt      DateTime @default(now())
@@ -53,10 +67,49 @@ model ContenedorLog {
   contenedorId   String?
   imagen         String
   puerto         Int?
-  estado         String   // running, stopped, error
+  estado         String
   mensaje        String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   empresa        MypeEmpresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+}
+
+model Ticket {
+  id             String        @id @default(uuid())
+  empresaId      String?
+  cliente        String
+  email          String?
+  telefono       String?
+  descripcion    String
+  estado         String        @default("pendiente")
+  asignadoAId    String?
+  asignadoPor    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  empresa        MypeEmpresa?  @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  asignadoA      Colaborador?  @relation("TicketAsignado", fields: [asignadoAId], references: [id], onDelete: SetNull)
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  adminId        String?
+  accion         String
+  entidad        String
+  entidadId      String?
+  detalle        String?
+  ip             String?
+  createdAt      DateTime @default(now())
+
+  admin          Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
+}
+
+model LockoutAttempt {
+  id             String   @id @default(uuid())
+  identifier     String   @unique
+  attempts       Int      @default(0)
+  lockedUntil    DateTime?
+  lastAttemptAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
 }
