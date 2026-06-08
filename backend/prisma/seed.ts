@@ -6,7 +6,8 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Iniciando seed de base de datos...');
 
-  const passwordHash = await bcrypt.hash('123456', 10);
+  const SALT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12', 10);
+  const passwordHash = await bcrypt.hash('123456', SALT_ROUNDS);
 
   const admin = await prisma.admin.upsert({
     where: { email: 'admin@demo.com' },

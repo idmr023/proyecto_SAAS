@@ -104,3 +104,12 @@ model AuditLog {
 
   admin          Admin?   @relation(fields: [adminId], references: [id], onDelete: SetNull)
 }
+
+model LockoutAttempt {
+  id             String   @id @default(uuid())
+  identifier     String   @unique
+  attempts       Int      @default(0)
+  lockedUntil    DateTime?
+  lastAttemptAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
+}

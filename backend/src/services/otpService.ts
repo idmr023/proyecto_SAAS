@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import crypto from 'crypto';
 import { env } from '../config/env.js';
 
 interface OTPStore {
@@ -11,7 +11,7 @@ interface OTPStore {
 const otpStore: OTPStore = {};
 
 export function generateOTP(adminId: string): string {
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = crypto.randomInt(100000, 999999).toString();
   const expiresAt = new Date(Date.now() + env.OTP_EXPIRATION_MINUTES * 60 * 1000);
   otpStore[adminId] = { code, expiresAt };
   return code;

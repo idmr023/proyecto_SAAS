@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { login, verifyMFA } from '../controllers/authController.js';
+import { login, verifyMFA, refreshToken, getSession, logout } from '../controllers/authController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 import rateLimit from 'express-rate-limit';
 
 const router = Router();
@@ -22,5 +23,8 @@ const mfaLimiter = rateLimit({
 
 router.post('/login', authLimiter, login);
 router.post('/verify-mfa', mfaLimiter, verifyMFA);
+router.post('/refresh', refreshToken);
+router.post('/logout', logout);
+router.get('/session', authMiddleware, getSession);
 
 export default router;

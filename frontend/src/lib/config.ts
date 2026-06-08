@@ -24,6 +24,7 @@ export const supabase = createSupabaseClient()
 export const dockerOrchestrator = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:8080",
   timeout: 30000,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

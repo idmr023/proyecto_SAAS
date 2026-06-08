@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 export default function LoginPage() {
   const { t } = useTranslation()
-  const { signIn, verifyMfa, session, user, isDemo, mfaPending } = useAuth()
+  const { signIn, verifyMfa, session, user, isDemo, mfaPending, loading } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [mfaCode, setMfaCode] = useState(["", "", "", "", "", ""])
@@ -33,14 +33,14 @@ export default function LoginPage() {
   })
 
   useEffect(() => {
-    if (session && user && !mfaPending) {
+    if (!loading && session && user && !mfaPending) {
       const routes: Record<string, string> = {
         admin: "/dashboard",
         colaborador: "/",
       }
       navigate(routes[user.role] || "/", { replace: true })
     }
-  }, [session, user, mfaPending, navigate])
+  }, [loading, session, user, mfaPending, navigate])
 
   useEffect(() => {
     if (mfaPending && inputRefs.current[0]) inputRefs.current[0].focus()

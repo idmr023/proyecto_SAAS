@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { supabase, IS_DEMO, dockerOrchestrator } from "@/lib/config"
 import { toast } from "sonner"
 
@@ -34,7 +34,7 @@ function loadSession(): StoredSession | null {
   if (!stored) return null
   try {
     const parsed = JSON.parse(stored)
-    if (!parsed.token || !parsed.user?.role) {
+    if (!parsed.user?.role) {
       localStorage.removeItem(AUTH_KEY)
       return null
     }
@@ -53,9 +53,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<{ email: string; id: string; name?: string; role: UserRole } | null>(
     initial?.user ?? null
   )
-  const [loading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [mfaPending, setMfaPending] = useState(false)
   const [pendingEmail, setPendingEmail] = useState("")
+
+  // Verificar sesión activa vía cookie/httpOnly en el backend
+  useEffect(() => {
+    if (IS_DEMO) {
+      setLoading(false)
+      return
+    }
+
+    async function checkSession() {
+      try {
+        const res = await dockerOrchestrator.get("/api/auth/session")
+        if (res.data.admin) {
+          const { id, email, role } = res.data.admin
+          const userData = { id, email, role }
+          setUser(userData)
+          setSession(true)
+          // Sincronizar localStorage con datos frescos
+          localStorage.setItem(AUTH_KEY, JSON.stringify({ token: "", user: userData }))
+        }
+      } catch {
+        // No hay sesión activa en el backend
+        localStorage.removeItem(AUTH_KEY)
+        setUser(null)
+        setSession(false)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkSession()
+  }, [])
 
   const signIn = async (email: string, password: string): Promise<string | null> => {
     if (IS_DEMO || !supabase) {
@@ -158,8 +189,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
-    if (!IS_DEMO && supabase) {
-      await supabase.auth.signOut()
+    if (!IS_DEMO) {
+      try {
+        await dockerOrchestrator.post("/api/auth/logout")
+      } catch {
+        // ignore
+      }
     }
     localStorage.removeItem(AUTH_KEY)
     setSession(false)

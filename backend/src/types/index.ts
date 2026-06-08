@@ -8,6 +8,13 @@ export interface JWTPayload {
   role: UserRole;
 }
 
+export interface RefreshPayload {
+  adminId: string;
+  email: string;
+  role: UserRole;
+  type: 'refresh';
+}
+
 export interface AuthRequest extends Request {
   admin?: JWTPayload;
 }
