@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: saas-orchestrator-api
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - DOCKER_NETWORK=saas_orchestrator_net
+      - BUILD_DIR=/tmp/saas-builds
+      - TEMPLATES_DIR=/app/templates/base
+      - MODULES_DIR=/app/modules
+    env_file:
+      - ./backend/.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - saas_net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: saas-orchestrator-web
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - saas_net
+    restart: unless-stopped
+
+networks:
+  saas_net:
+    driver: bridge

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { Send, CheckCircle2 } from "lucide-react"
-import { dockerOrchestrator, IS_DEMO } from "@/lib/config"
+import { dockerOrchestrator } from "@/lib/config"
 import { useTranslation } from "react-i18next"
 
 interface TicketForm {
@@ -41,13 +41,6 @@ export default function SistemaVentaPage() {
     }
 
     setEnviando(true)
-    if (IS_DEMO) {
-      await new Promise((r) => setTimeout(r, 500))
-      setEnviado(true)
-      toast.success(t("sistema.ticket_creado"))
-      setEnviando(false)
-      return
-    }
     try {
       await dockerOrchestrator.post("/api/tickets", form)
       setEnviado(true)
@@ -68,10 +61,10 @@ export default function SistemaVentaPage() {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-lg mx-auto text-center py-16"
       >
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-8 h-8 text-green-600" />
+        <div className="w-16 h-16 bg-emerald-500/15 rounded-sm flex items-center justify-center mx-auto mb-6 border border-emerald-700/30">
+          <CheckCircle2 className="w-8 h-8 text-emerald-700" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">{t("sistema.ticket_exito")}</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">{t("sistema.ticket_exito")}</h2>
         <p className="text-muted-foreground mb-8">{t("sistema.ticket_exito_desc")}</p>
         <Button onClick={() => { setEnviado(false); setForm({ cliente: "", email: "", telefono: "", descripcion: "" }); setError("") }}>
           {t("sistema.nuevo_pedido")}
@@ -82,12 +75,12 @@ export default function SistemaVentaPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-lg mx-auto"
+      className="max-w-lg mx-auto p-4 lg:p-6"
     >
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">{t("sistema.form_title")}</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">{t("sistema.form_title")}</h1>
         <p className="text-muted-foreground text-sm mt-1">{t("sistema.form_desc")}</p>
       </div>
 
@@ -120,6 +113,7 @@ export default function SistemaVentaPage() {
             value={form.telefono}
             onChange={(e) => setForm({ ...form, telefono: e.target.value })}
             placeholder="999 888 777"
+            className="font-mono"
           />
         </div>
 

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TicketCheck, ArrowLeft, RefreshCw } from "lucide-react"
-import { dockerOrchestrator, IS_DEMO } from "@/lib/config"
+import { dockerOrchestrator } from "@/lib/config"
 import { toast } from "sonner"
 import { useTranslation } from "react-i18next"
 
@@ -18,10 +18,10 @@ interface Ticket {
 }
 
 const statusColors: Record<string, string> = {
-  pendiente: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  en_proceso: "bg-blue-100 text-blue-800 border-blue-200",
-  resuelto: "bg-green-100 text-green-800 border-green-200",
-  cerrado: "bg-slate-100 text-slate-500 border-slate-200",
+  pendiente: "bg-amber-500/15 text-amber-700 border-amber-700/30",
+  en_proceso: "bg-primary/15 text-primary border-primary/30",
+  resuelto: "bg-emerald-500/15 text-emerald-700 border-emerald-700/30",
+  cerrado: "bg-secondary text-muted-foreground border-border",
 }
 
 export default function ColaboradorTicketsPage() {
@@ -37,16 +37,6 @@ export default function ColaboradorTicketsPage() {
 
   const fetchTickets = async () => {
     setLoading(true)
-    if (IS_DEMO) {
-      setTimeout(() => {
-        setTickets([
-          { id: "2", cliente: "María García", descripcion: "La comanda no imprime en cocina", estado: "en_proceso", createdAt: new Date().toISOString() },
-          { id: "3", cliente: "Carlos López", descripcion: "Quiero agregar el módulo de restaurantes", estado: "resuelto", createdAt: new Date(Date.now() - 86400000).toISOString() },
-        ])
-        setLoading(false)
-      }, 400)
-      return
-    }
     try {
       const res = await dockerOrchestrator.get("/api/tickets")
       setTickets(res.data.tickets)
@@ -59,13 +49,6 @@ export default function ColaboradorTicketsPage() {
 
   const updateStatus = async (id: string, estado: string) => {
     setUpdating(id)
-    if (IS_DEMO) {
-      await new Promise((r) => setTimeout(r, 300))
-      setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, estado } : t)))
-      toast.success(t("tickets.estado_actualizado"))
-      setUpdating(null)
-      return
-    }
     try {
       await dockerOrchestrator.patch(`/api/tickets/${id}/status`, { estado })
       toast.success(t("tickets.estado_actualizado"))
@@ -78,10 +61,10 @@ export default function ColaboradorTicketsPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 max-w-4xl mx-auto p-4 lg:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("tickets.colab_title")}</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t("tickets.colab_title")}</h1>
           <p className="text-muted-foreground text-sm">{t("tickets.colab_subtitle")}</p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => navigate("/solicitar-proyecto")}>
@@ -92,8 +75,8 @@ export default function ColaboradorTicketsPage() {
 
       <div className="flex items-center justify-between">
         <div className="flex gap-2 text-sm text-muted-foreground">
-          <Badge variant="outline">{t("tickets.total")}: {tickets.length}</Badge>
-          <Badge variant="outline" className="border-blue-200">
+          <Badge variant="outline" className="font-mono">{t("tickets.total")}: {tickets.length}</Badge>
+          <Badge variant="outline" className="border-primary/30 text-primary font-mono">
             {t("tickets.estado_en_proceso")}: {tickets.filter(t => t.estado === "en_proceso").length}
           </Badge>
         </div>
@@ -106,7 +89,7 @@ export default function ColaboradorTicketsPage() {
       {loading ? (
         <div className="space-y-3">
           {[1,2,3].map((i) => (
-            <Card key={i}><CardContent className="p-4"><div className="h-5 bg-muted rounded animate-pulse w-1/3" /></CardContent></Card>
+            <Card key={i}><CardContent className="p-4"><div className="h-5 bg-muted rounded-sm animate-pulse w-1/3" /></CardContent></Card>
           ))}
         </div>
       ) : tickets.length === 0 ? (
@@ -120,9 +103,9 @@ export default function ColaboradorTicketsPage() {
         <div className="space-y-3">
           {tickets.map((ticket) => (
             <Card key={ticket.id}>
-              <CardHeader className="pb-2 flex flex-row items-start justify-between">
-                <CardTitle className="text-base">{ticket.cliente}</CardTitle>
-                <Badge className={statusColors[ticket.estado] || ""}>
+              <CardHeader className="pb-2 flex flex-row items-start justify-between border-b border-border">
+                <CardTitle className="text-base tracking-tight">{ticket.cliente}</CardTitle>
+                <Badge variant="outline" className={`${statusColors[ticket.estado] || ""} uppercase tracking-wide`}>
                   {t(`tickets.estado_${ticket.estado}`)}
                 </Badge>
               </CardHeader>
@@ -135,7 +118,7 @@ export default function ColaboradorTicketsPage() {
                     </Button>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">{new Date(ticket.createdAt).toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground mt-3 font-mono">{new Date(ticket.createdAt).toLocaleString()}</p>
               </CardContent>
             </Card>
           ))}

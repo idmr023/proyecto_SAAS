@@ -99,7 +99,7 @@ export default function DataTable<T>({
       ) : (
         <div className="space-y-2">
           {displayData.map((item) => (
-            <Card key={keyExtractor(item)} className="transition-all hover:shadow-sm hover:border-primary/30">
+            <Card key={keyExtractor(item)} className="transition-colors hover:border-primary/40">
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
                   {columns.map((col) => (

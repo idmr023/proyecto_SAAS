@@ -36,10 +36,10 @@ import SolicitarSistemaModal from "@/components/shared/SolicitarSistemaModal"
 const container = "max-w-6xl mx-auto px-4 lg:px-6"
 
 const fadeUp = {
-  initial: { opacity: 0, y: 24 },
+  initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-80px" as const },
-  transition: { duration: 0.5, ease: "easeOut" as const },
+  transition: { duration: 0.4, ease: "easeOut" as const },
 }
 
 const benefits = [
@@ -103,15 +103,15 @@ export default function LandingPage() {
     <div className="overflow-hidden">
       {/* ───── Fixed Nav ───── */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
           scrolled
-            ? "bg-background/80 backdrop-blur-xl border-b shadow-sm"
+            ? "bg-background border-b border-border"
             : "bg-transparent"
         }`}
       >
         <div className="flex h-16 items-center px-4 lg:px-6 max-w-7xl mx-auto">
-          <Link to="/" className="flex items-center gap-2 font-semibold shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm">
+          <Link to="/" className="flex items-center gap-2 font-bold shrink-0 tracking-tight">
+            <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
               <Container className="h-4 w-4" />
             </div>
             <span className={scrolled ? "" : "text-white"}>{t("app.name")}</span>
@@ -122,10 +122,10 @@ export default function LandingPage() {
               <button
                 key={href}
                 onClick={() => scrollTo(href.slice(1))}
-                className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                className={`px-3 py-2 text-sm rounded-sm transition-colors ${
                   scrolled
                     ? "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    : "text-white hover:bg-white/20"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
                 }`}
               >
                 {label}
@@ -136,10 +136,10 @@ export default function LandingPage() {
                 <span className={`w-px h-5 mx-1 ${scrolled ? "bg-border" : "bg-white/20"}`} />
                 <button
                   onClick={() => setSolicitarOpen(true)}
-                  className={`px-3 py-2 text-sm rounded-md transition-colors flex items-center gap-1.5 ${
+                  className={`px-3 py-2 text-sm rounded-sm transition-colors flex items-center gap-1.5 ${
                     scrolled
                       ? "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      : "text-white hover:bg-white/20"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
                   }`}
                 >
                   <FileText className="h-3.5 w-3.5" />
@@ -147,10 +147,10 @@ export default function LandingPage() {
                 </button>
                 <button
                   onClick={() => scrollTo("cuenta")}
-                  className={`px-3 py-2 text-sm rounded-md transition-colors flex items-center gap-1.5 ${
+                  className={`px-3 py-2 text-sm rounded-sm transition-colors flex items-center gap-1.5 ${
                     scrolled
                       ? "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      : "text-white hover:bg-white/20"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
                   }`}
                 >
                   <User className="h-3.5 w-3.5" />
@@ -163,10 +163,10 @@ export default function LandingPage() {
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={toggle}
-              className={`h-9 w-9 rounded-lg flex items-center justify-center transition-colors ${
+              className={`h-9 w-9 rounded-sm flex items-center justify-center transition-colors ${
                 scrolled
                   ? "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  : "text-white hover:bg-white/20"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
               aria-label="Toggle theme"
             >
@@ -193,7 +193,7 @@ export default function LandingPage() {
 
             <button
               onClick={() => setMobileOpen(true)}
-              className={`md:hidden h-9 w-9 rounded-lg flex items-center justify-center ${
+              className={`md:hidden h-9 w-9 rounded-sm flex items-center justify-center ${
                 scrolled ? "text-foreground" : "text-white"
               }`}
               aria-label="Abrir menú"
@@ -213,16 +213,16 @@ export default function LandingPage() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 250 }}
-            className="absolute right-0 top-0 h-full w-64 bg-background border-l shadow-xl"
+            className="absolute right-0 top-0 h-full w-64 bg-background border-l border-border"
           >
-            <div className="flex items-center justify-between px-4 h-16 border-b">
-              <div className="flex items-center gap-2 font-semibold">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+            <div className="flex items-center justify-between px-4 h-16 border-b border-border">
+              <div className="flex items-center gap-2 font-bold tracking-tight">
+                <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
                   <Container className="h-4 w-4" />
                 </div>
                 <span>{t("app.name")}</span>
               </div>
-              <button onClick={() => setMobileOpen(false)} className="h-9 w-9 rounded-lg flex items-center justify-center hover:bg-accent">
+              <button onClick={() => setMobileOpen(false)} className="h-9 w-9 rounded-sm flex items-center justify-center hover:bg-accent">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -231,7 +231,7 @@ export default function LandingPage() {
                   <button
                     key={href}
                     onClick={() => scrollTo(href.slice(1))}
-                    className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-md hover:bg-accent text-foreground text-left"
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-sm hover:bg-accent text-foreground text-left"
                   >
                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                     {label}
@@ -239,27 +239,27 @@ export default function LandingPage() {
                 ))}
                 {isCliente && (
                   <>
-                    <div className="border-t my-1" />
+                    <div className="border-t border-border my-1" />
                     <button
                       onClick={() => { setSolicitarOpen(true); setMobileOpen(false) }}
-                      className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-md hover:bg-accent text-foreground text-left"
+                      className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-sm hover:bg-accent text-foreground text-left"
                     >
                       <FileText className="h-4 w-4" />
                       {t("nav.solicitar_sistema")}
                     </button>
                     <button
                       onClick={() => { scrollTo("cuenta"); setMobileOpen(false) }}
-                      className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-md hover:bg-accent text-foreground text-left"
+                      className="flex items-center gap-2 px-3 py-2.5 text-sm rounded-sm hover:bg-accent text-foreground text-left"
                     >
                       <User className="h-4 w-4" />
                       {t("nav.cuenta")}
                     </button>
                   </>
                 )}
-                <div className="border-t my-3" />
+                <div className="border-t border-border my-3" />
                 {isCliente ? (
                   <div className="space-y-2">
-                    <div className="text-xs text-muted-foreground text-center">{user?.email}</div>
+                    <div className="text-xs text-muted-foreground text-center font-mono">{user?.email}</div>
                     <Button variant="outline" className="w-full" onClick={() => { signOut(); setMobileOpen(false) }}>
                       <LogOut className="mr-2 h-4 w-4" />
                       {t("nav.logout")}
@@ -279,21 +279,20 @@ export default function LandingPage() {
       )}
 
       {/* ───── Hero ───── */}
-      <motion.section style={{ opacity: heroOpacity, scale: heroScale }} className="relative min-h-screen flex items-center bg-gradient-to-br from-[#0B1120] via-[#0F1F4A] to-[#0F2340] text-white">
+      <motion.section style={{ opacity: heroOpacity, scale: heroScale }} className="relative min-h-screen flex items-center bg-[#0a0e1a] text-white">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.12),transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(99,102,241,0.08),transparent_50%)]" />
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.08),transparent_50%)]" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
         </div>
 
         <div className={`${container} relative pt-32 pb-20 md:pt-40 md:pb-28`}>
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
             className="text-center"
           >
-            <Badge variant="outline" className="mb-6 border-blue-400/30 text-blue-300 bg-blue-500/10 px-4 py-1.5 text-xs font-medium rounded-full">
+            <Badge variant="outline" className="mb-6 border-primary/40 text-primary bg-primary/10 px-4 py-1.5 text-xs font-medium uppercase tracking-wide rounded-sm">
               <Sparkles className="w-3 h-3 mr-1.5" />
               {t("landing.hero_badge")}
             </Badge>
@@ -301,37 +300,38 @@ export default function LandingPage() {
 
           <motion.h1
             className="text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-5"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <span className="bg-gradient-to-r from-white via-blue-100 to-blue-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-white to-slate-400 bg-clip-text text-transparent">
               {t("landing.hero_title")}
             </span>
           </motion.h1>
 
           <motion.p
-            className="text-center text-lg md:text-xl text-blue-200/80 max-w-2xl mx-auto mb-10 leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
+            className="text-center text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
             {t("landing.hero_desc")}
           </motion.p>
 
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Button size="lg" className="bg-white text-[#0F1F4A] hover:bg-blue-50 shadow-xl hover:shadow-2xl text-base px-8 h-12 rounded-xl transition-all" onClick={() => setSolicitarOpen(true)}>
+            <Button size="lg" className="bg-white text-[#0a0e1a] hover:bg-white/90 hard-shadow-md hover:hard-shadow-lg text-base px-8 h-12" onClick={() => setSolicitarOpen(true)}>
               {t("landing.hero_cta_primary")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
               size="lg"
-              className="bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20 text-base px-8 h-12 rounded-xl shadow-lg transition-all"
+              variant="outline"
+              className="bg-transparent text-white border-white/30 hover:bg-white/10 hover:text-white hover:border-white/50 text-base px-8 h-12"
               onClick={() => scrollTo("features")}
             >
               {t("landing.hero_cta_secondary")}
@@ -340,22 +340,22 @@ export default function LandingPage() {
 
           {/* Stats bar */}
           <motion.div
-            className="mt-16 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10"
-            initial={{ opacity: 0, y: 20 }}
+            className="mt-16 md:mt-20 grid grid-cols-2 md:grid-cols-4 border border-white/10 rounded-sm overflow-hidden"
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.45 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
           >
             {stats.map(({ icon: Icon, value, labelKey }, i) => (
               <motion.div
                 key={labelKey}
-                className="bg-[#0B1120]/60 backdrop-blur-sm p-5 md:p-6 text-center"
-                initial={{ opacity: 0, y: 16 }}
+                className="bg-white/5 p-5 md:p-6 text-center border-r border-white/10 last:border-r-0"
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.55 + i * 0.08 }}
+                transition={{ duration: 0.3, delay: 0.5 + i * 0.06 }}
               >
-                <Icon className="w-5 h-5 mx-auto text-blue-400 mb-2" />
-                <div className="text-2xl md:text-3xl font-bold text-white">{value}</div>
-                <div className="text-xs text-blue-300/80 mt-0.5">{t(labelKey)}</div>
+                <Icon className="w-5 h-5 mx-auto text-primary mb-2" />
+                <div className="text-2xl md:text-3xl font-bold text-white font-mono">{value}</div>
+                <div className="text-xs text-slate-500 mt-0.5 uppercase tracking-wide">{t(labelKey)}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -365,24 +365,24 @@ export default function LandingPage() {
       {/* ───── Features ───── */}
       <section id="features" className={`${container} py-20 md:py-28`}>
         <motion.div className="text-center mb-14" {...fadeUp}>
-          <Badge variant="secondary" className="mb-3">{t("landing.features_badge")}</Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("landing.features_title")}</h2>
+          <Badge variant="secondary" className="mb-3 uppercase tracking-wide">{t("landing.features_badge")}</Badge>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 tracking-tight">{t("landing.features_title")}</h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">{t("landing.features_subtitle")}</p>
         </motion.div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {benefits.map(({ key, icon: Icon }, i) => (
             <motion.div
               key={key}
-              className="group bg-card rounded-xl p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-              initial={{ opacity: 0, y: 24 }}
+              className="group bg-card rounded-sm p-6 border border-border hover:border-primary/50 hover:hard-shadow-sm transition-all duration-200"
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
+              transition={{ duration: 0.3, delay: i * 0.06 }}
             >
-              <div className="w-11 h-11 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors duration-300">
-                <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:text-white transition-colors duration-300" />
+              <div className="w-11 h-11 bg-secondary border border-border rounded-sm flex items-center justify-center mb-4 group-hover:bg-primary group-hover:border-primary transition-colors duration-200">
+                <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-200" />
               </div>
-              <h3 className="font-semibold text-foreground mb-1.5">{t(`sistema.${key}_title`)}</h3>
+              <h3 className="font-semibold text-foreground mb-1.5 tracking-tight">{t(`sistema.${key}_title`)}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{t(`sistema.${key}_desc`)}</p>
             </motion.div>
           ))}
@@ -390,32 +390,32 @@ export default function LandingPage() {
       </section>
 
       {/* ───── How It Works ───── */}
-      <section className="bg-muted/40 py-20 md:py-28">
+      <section className="bg-muted/40 py-20 md:py-28 border-y border-border">
         <div className={container}>
           <motion.div className="text-center mb-14" {...fadeUp}>
-            <Badge variant="secondary" className="mb-3">{t("landing.how_badge")}</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("landing.how_title")}</h2>
+            <Badge variant="secondary" className="mb-3 uppercase tracking-wide">{t("landing.how_badge")}</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 tracking-tight">{t("landing.how_title")}</h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">{t("landing.how_subtitle")}</p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* Connector line */}
-            <div className="hidden md:block absolute top-20 left-[calc(16.66%+2rem)] right-[calc(16.66%+2rem)] h-0.5 bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+            <div className="hidden md:block absolute top-20 left-[calc(16.66%+2rem)] right-[calc(16.66%+2rem)] h-px bg-border" />
             {steps.map(({ icon: Icon, key }, i) => (
               <motion.div
                 key={key}
                 className="relative text-center"
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.12 }}
+                transition={{ duration: 0.3, delay: i * 0.1 }}
               >
-                <div className="relative z-10 w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-lg shadow-blue-500/20 flex items-center justify-center">
+                <div className="relative z-10 w-16 h-16 mx-auto mb-5 rounded-sm bg-primary text-primary-foreground hard-shadow-sm flex items-center justify-center border-2 border-primary">
                   <Icon className="w-7 h-7" />
-                  <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white dark:bg-card border text-xs font-bold text-blue-700 flex items-center justify-center shadow-sm">
+                  <span className="absolute -top-2 -right-2 w-6 h-6 rounded-sm bg-background border border-border text-xs font-bold text-foreground flex items-center justify-center font-mono">
                     {i + 1}
                   </span>
                 </div>
-                <h3 className="font-semibold text-foreground mb-1.5">{t(`landing.${key}_title`)}</h3>
+                <h3 className="font-semibold text-foreground mb-1.5 tracking-tight">{t(`landing.${key}_title`)}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">{t(`landing.${key}_desc`)}</p>
               </motion.div>
             ))}
@@ -426,31 +426,30 @@ export default function LandingPage() {
       {/* ───── Projects ───── */}
       <section id="projects" className={`${container} py-20 md:py-28`}>
         <motion.div className="text-center mb-14" {...fadeUp}>
-          <Badge variant="secondary" className="mb-3">{t("landing.projects_badge")}</Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("sistema.projects_title")}</h2>
+          <Badge variant="secondary" className="mb-3 uppercase tracking-wide">{t("landing.projects_badge")}</Badge>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 tracking-tight">{t("sistema.projects_title")}</h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">{t("landing.projects_subtitle")}</p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-6">
           {projects.map(({ key, tags }, i) => (
             <motion.div
               key={key}
-              className="group bg-card rounded-2xl border shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300"
-              initial={{ opacity: 0, y: 24 }}
+              className="group bg-card rounded-sm border border-border overflow-hidden hover:border-primary/50 hover:hard-shadow-sm transition-all duration-200"
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
+              transition={{ duration: 0.3, delay: i * 0.08 }}
             >
-              <div className="h-44 bg-gradient-to-br from-[#0F1F4A] to-[#0B1120] flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.2),transparent_60%)]" />
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
-                <Quote className="w-14 h-14 text-white/20 group-hover:text-white/40 group-hover:scale-110 transition-all duration-500" />
+              <div className="h-44 bg-[#0a0e1a] flex items-center justify-center relative overflow-hidden border-b border-border">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent_60%)]" />
+                <Quote className="w-14 h-14 text-white/20 group-hover:text-white/40 transition-colors duration-300" />
               </div>
               <div className="p-6">
-                <h3 className="font-semibold text-foreground mb-1.5">{t(`sistema.${key}_name`)}</h3>
+                <h3 className="font-semibold text-foreground mb-1.5 tracking-tight">{t(`sistema.${key}_name`)}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">{t(`sistema.${key}_desc`)}</p>
                 <div className="flex gap-1.5 flex-wrap">
                   {tags.map((tag) => (
-                    <span key={tag} className="text-[11px] font-medium bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-full border border-blue-200/50 dark:border-blue-800/50">
+                    <span key={tag} className="text-[11px] font-medium uppercase tracking-wide bg-secondary text-muted-foreground border border-border px-2.5 py-1 rounded-sm">
                       {tag}
                     </span>
                   ))}
@@ -462,30 +461,30 @@ export default function LandingPage() {
       </section>
 
       {/* ───── Testimonials ───── */}
-      <section className="bg-muted/40 py-20 md:py-28">
+      <section className="bg-muted/40 py-20 md:py-28 border-y border-border">
         <div className={container}>
           <motion.div className="text-center mb-14" {...fadeUp}>
-            <Badge variant="secondary" className="mb-3">{t("landing.testimonials_badge")}</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("landing.testimonials_title")}</h2>
+            <Badge variant="secondary" className="mb-3 uppercase tracking-wide">{t("landing.testimonials_badge")}</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 tracking-tight">{t("landing.testimonials_title")}</h2>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <motion.div
                 key={i}
-                className="bg-card rounded-xl border p-6 shadow-sm hover:shadow-md transition-shadow"
-                initial={{ opacity: 0, y: 20 }}
+                className="bg-card rounded-sm border border-border p-6 hover:border-primary/30 transition-colors"
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                transition={{ duration: 0.3, delay: i * 0.08 }}
               >
                 <div className="flex gap-1 mb-3">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <svg key={s} className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                    <svg key={s} className="w-4 h-4 fill-amber-500 text-amber-500" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">&ldquo;{t(`landing.testimonial_${i}_text`)}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xs font-bold">
+                <div className="flex items-center gap-3 border-t border-border pt-3">
+                  <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold font-mono">
                     {t(`landing.testimonial_${i}_name`).charAt(0)}
                   </div>
                   <div>
@@ -500,30 +499,29 @@ export default function LandingPage() {
       </section>
 
       {/* ───── CTA ───── */}
-      <section id="contact" className="relative py-20 md:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0B1120] via-[#0F1F4A] to-[#0F2340]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.1),transparent_60%)]" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+      <section id="contact" className="relative py-20 md:py-28 overflow-hidden bg-[#0a0e1a]">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.05),transparent_60%)]" />
 
         <div className={`${container} relative text-center`}>
           <motion.div {...fadeUp}>
-            <Badge variant="outline" className="mb-4 border-blue-400/30 text-blue-300 bg-blue-500/10 px-4 py-1.5 rounded-full">
+            <Badge variant="outline" className="mb-4 border-primary/40 text-primary bg-primary/10 px-4 py-1.5 rounded-sm uppercase tracking-wide">
               {t("landing.cta_badge")}
             </Badge>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight tracking-tight">
               {t("landing.cta_title")}
             </h2>
-            <p className="text-lg text-blue-200/80 max-w-xl mx-auto mb-8">
+            <p className="text-lg text-slate-400 max-w-xl mx-auto mb-8">
               {t("landing.cta_desc")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="bg-white text-[#0F1F4A] hover:bg-blue-50 shadow-xl hover:shadow-2xl text-base px-8 h-12 rounded-xl transition-all" onClick={() => setSolicitarOpen(true)}>
+              <Button size="lg" className="bg-white text-[#0a0e1a] hover:bg-white/90 hard-shadow-md hover:hard-shadow-lg text-base px-8 h-12" onClick={() => setSolicitarOpen(true)}>
                 {t("landing.cta_primary")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button
                 size="lg"
-                className="bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20 text-base px-8 h-12 rounded-xl shadow-lg"
+                variant="outline"
+                className="bg-transparent text-white border-white/30 hover:bg-white/10 hover:text-white hover:border-white/50 text-base px-8 h-12"
                 onClick={() => scrollTo("features")}
               >
                 {t("landing.cta_secondary")}
@@ -534,12 +532,12 @@ export default function LandingPage() {
       </section>
 
       {/* ───── Footer ───── */}
-      <footer className="border-t bg-background">
+      <footer className="border-t border-border bg-background">
         <div className={`${container} py-12 md:py-16`}>
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div className="sm:col-span-2 md:col-span-1">
-              <Link to="/" className="flex items-center gap-2 font-semibold mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+              <Link to="/" className="flex items-center gap-2 font-bold mb-3 tracking-tight">
+                <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
                   <Container className="h-4 w-4" />
                 </div>
                 <span>{t("app.name")}</span>
@@ -549,7 +547,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">{t("landing.footer_product")}</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">{t("landing.footer_product")}</h4>
               <ul className="space-y-2">
                 {["features", "projects", "pricing"].map((item) => (
                   <li key={item}>
@@ -564,7 +562,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">{t("landing.footer_company")}</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">{t("landing.footer_company")}</h4>
               <ul className="space-y-2">
                 {["about", "blog", "contact"].map((item) => (
                   <li key={item}>
@@ -574,7 +572,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">{t("landing.footer_legal")}</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">{t("landing.footer_legal")}</h4>
               <ul className="space-y-2">
                 {["privacy", "terms"].map((item) => (
                   <li key={item}>
@@ -584,7 +582,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          <div className="border-t mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground">{t("landing.footer_copyright")}</p>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <button onClick={toggle} className="hover:text-foreground transition-colors flex items-center gap-1">

@@ -57,10 +57,11 @@ app.use(cookieParser());
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 300,
   message: { error: 'Demasiadas solicitudes. Intenta de nuevo en 15 minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path === '/api/health' || req.path === '/api/auth/session' || req.path === '/api/auth/refresh',
 });
 
 app.use(globalLimiter);

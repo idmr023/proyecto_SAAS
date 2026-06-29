@@ -10,14 +10,16 @@ export default function SolicitarProyectoPage() {
   const { user } = useAuth()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
-      <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur-sm">
+    <div className="min-h-screen bg-muted/40">
+      <header className="sticky top-0 z-50 border-b border-border bg-background">
         <div className="max-w-5xl mx-auto px-4 lg:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-lg text-primary">
-            <Container className="w-5 h-5" />
+          <div className="flex items-center gap-2 font-bold text-lg text-foreground tracking-tight">
+            <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
+              <Container className="w-4 h-4" />
+            </div>
             SaaS Orchestrator
           </div>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground font-mono">
             <span>{user?.name || user?.email}</span>
           </div>
         </div>
@@ -31,15 +33,15 @@ export default function SolicitarProyectoPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
+            <Card className="border-l-[3px] border-primary/30">
+              <CardHeader className="border-b border-border">
                 <div className="flex items-center gap-2">
-                  <Rocket className="w-5 h-5 text-blue-600" />
-                  <CardTitle className="text-lg">Nuevo Proyecto</CardTitle>
+                  <Rocket className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg tracking-tight">Nuevo Proyecto</CardTitle>
                 </div>
                 <CardDescription>Solicite la creación de un nuevo proyecto SaaS.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-4">
                 <div>
                   <Label htmlFor="nombre">Nombre del proyecto</Label>
                   <Input id="nombre" placeholder="Ej: Restaurante Los Olivos" />
@@ -52,15 +54,15 @@ export default function SolicitarProyectoPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+            <Card className="border-l-[3px] border-emerald-700/30">
+              <CardHeader className="border-b border-border">
                 <div className="flex items-center gap-2">
-                  <Package className="w-5 h-5 text-green-600" />
-                  <CardTitle className="text-lg">Solicitar Módulo</CardTitle>
+                  <Package className="w-5 h-5 text-emerald-700" />
+                  <CardTitle className="text-lg tracking-tight">Solicitar Módulo</CardTitle>
                 </div>
                 <CardDescription>Solicite la adición de un módulo a un proyecto existente.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-4">
                 <div>
                   <Label htmlFor="proyecto">Proyecto existente</Label>
                   <Input id="proyecto" placeholder="Nombre del proyecto" />

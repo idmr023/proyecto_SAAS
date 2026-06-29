@@ -12,7 +12,6 @@ import {
   Sun,
   X,
   Menu,
-  Sparkles,
   TicketCheck,
   Eye,
 } from "lucide-react"
@@ -29,7 +28,7 @@ const navItems = [
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false)
-  const { signOut, user, isDemo } = useAuth()
+  const { signOut, user } = useAuth()
   const { theme, toggle } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
@@ -68,11 +67,11 @@ export default function MobileNav() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="fixed right-0 top-0 z-50 h-full w-64 border-l bg-background sm:hidden"
+              className="fixed right-0 top-0 z-50 h-full w-64 border-l border-border bg-background sm:hidden"
             >
-              <div className="flex items-center justify-between border-b px-4 h-14">
-                <div className="flex items-center gap-2 font-semibold">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+              <div className="flex items-center justify-between border-b border-border px-4 h-14">
+                <div className="flex items-center gap-2 font-bold tracking-tight">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
                     <Container className="h-4 w-4" />
                   </div>
                   <span>{t("app.name")}</span>
@@ -107,7 +106,7 @@ export default function MobileNav() {
                     </Button>
                   )
                 })}
-                <div className="border-t my-1" />
+                <div className="border-t border-border my-1" />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -122,15 +121,9 @@ export default function MobileNav() {
                 </Button>
               </nav>
 
-              <div className="absolute bottom-0 left-0 right-0 border-t p-3 space-y-2">
-                {isDemo && (
-                  <div className="flex items-center justify-center gap-1 text-xs text-amber-500">
-                    <Sparkles className="h-3 w-3" />
-                    {t("nav.demo")}
-                  </div>
-                )}
+              <div className="absolute bottom-0 left-0 right-0 border-t border-border p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground truncate max-w-[140px]">
+                  <span className="text-xs text-muted-foreground font-mono truncate max-w-[140px]">
                     {user?.email}
                   </span>
                   <div className="flex gap-1">

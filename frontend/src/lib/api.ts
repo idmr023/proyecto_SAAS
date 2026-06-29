@@ -25,8 +25,9 @@ export interface StatusResponse {
 export interface AuthResponse {
   message: string
   token?: string
-  admin?: { id: string; email: string; nombre: string }
+  admin?: { id: string; email: string; nombre: string; role: string }
   mfaRequired?: boolean
+  qrCode?: string
 }
 
 export interface DeployResponse {

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import prisma from '../config/database.js';
 import { env } from '../config/env.js';
-import { generateOTP, verifyOTP } from '../services/otpService.js';
+import { generateTotpSecret, generateQrCode, verifyTotp } from '../services/totpService.js';
 import { recordFailedAttempt, isLocked, clearAttempts, getRemainingLockoutMinutes } from '../services/lockoutService.js';
 import { registrarAuditoria } from '../services/auditService.js';
 import type { AuthRequest, JWTPayload, RefreshPayload } from '../types/index.js';
@@ -97,21 +97,46 @@ export async function login(req: Request, res: Response): Promise<void> {
 
       await clearAttempts(lockKey);
 
-      const otp = generateOTP(admin.id);
-      if (env.NODE_ENV !== 'production') {
-        console.log(`[OTP ADMIN] Código para ${email}: ${otp}`);
+      let secret = admin.totpSecret;
+      if (!secret) {
+        const generated = await generateTotpSecret(admin.email);
+        secret = generated.secret;
+        await prisma.admin.update({
+          where: { id: admin.id },
+          data: { totpSecret: secret },
+        });
+        await registrarAuditoria({
+          adminId: admin.id,
+          accion: 'TOTP_SETUP',
+          entidad: 'Admin',
+          entidadId: admin.id,
+          detalle: `Secret TOTP generado para ${email}`,
+          ip: await getClientIp(req),
+        });
+        res.json({
+          message: 'Escanea el código QR con tu autenticador',
+          mfaRequired: true,
+          role: 'admin',
+          qrCode: generated.qrCode,
+        });
+        return;
       }
 
+      const qrCode = await generateQrCode(admin.email, secret);
       await registrarAuditoria({
         adminId: admin.id,
-        accion: 'LOGIN_OTP_ENVIADO',
+        accion: 'LOGIN_MFA_REQUIRED',
         entidad: 'Admin',
         entidadId: admin.id,
-        detalle: `OTP enviado a ${email}`,
+        detalle: `MFA requerido para ${email}`,
         ip: await getClientIp(req),
       });
-
-      res.json({ message: 'Código de verificación enviado a tu correo', mfaRequired: true, role: 'admin' });
+      res.json({
+        message: 'Escanea el código QR con tu autenticador',
+        mfaRequired: true,
+        role: 'admin',
+        qrCode,
+      });
       return;
     }
 
@@ -173,7 +198,12 @@ export async function verifyMFA(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    if (!verifyOTP(admin.id, code)) {
+    if (!admin.totpSecret) {
+      res.status(403).json({ error: 'No hay secret TOTP configurado. Inicia sesión nuevamente.' });
+      return;
+    }
+
+    if (!await verifyTotp(admin.totpSecret, code)) {
       await registrarAuditoria({
         adminId: admin.id,
         accion: 'MFA_FALLIDO',
@@ -197,7 +227,7 @@ export async function verifyMFA(req: Request, res: Response): Promise<void> {
       accion: 'LOGIN_EXITOSO',
       entidad: 'Admin',
       entidadId: admin.id,
-      detalle: `Admin ${email} autenticado vía MFA`,
+      detalle: `Admin ${email} autenticado vía TOTP`,
       ip: await getClientIp(req),
     });
 

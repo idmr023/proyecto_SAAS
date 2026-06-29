@@ -1,0 +1,5 @@
+export { default as LandingPage } from './LandingPage'
+export { default as HeroSection } from './sections/HeroSection'
+export { default as BenefitsSection } from './sections/BenefitsSection'
+export { default as ContactSection } from './sections/ContactSection'
+export { default as FooterSection } from './sections/FooterSection'

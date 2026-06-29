@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -12,13 +12,16 @@ import { toast } from "sonner"
 import { loginSchema, type LoginInput } from "@/lib/validations"
 import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
+
+const CODE_LENGTH = 6
 
 export default function LoginPage() {
   const { t } = useTranslation()
-  const { signIn, verifyMfa, session, user, isDemo, mfaPending, loading } = useAuth()
+  const { signIn, verifyMfa, session, user, mfaPending, loading, qrCode } = useAuth()
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
-  const [mfaCode, setMfaCode] = useState(["", "", "", "", "", ""])
+  const [mfaCode, setMfaCode] = useState<string[]>(Array(CODE_LENGTH).fill(""))
   const [mfaError, setMfaError] = useState("")
   const [isMfaLoading, setIsMfaLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -46,40 +49,116 @@ export default function LoginPage() {
     if (mfaPending && inputRefs.current[0]) inputRefs.current[0].focus()
   }, [mfaPending])
 
-  const handleMfaChange = (index: number, value: string) => {
-    if (!/^\d?$/.test(value)) return
-    const newCode = [...mfaCode]
-    newCode[index] = value
-    setMfaCode(newCode)
+  const focusInput = useCallback((idx: number) => {
+    const clamped = Math.max(0, Math.min(idx, CODE_LENGTH - 1))
+    inputRefs.current[clamped]?.focus()
+    requestAnimationFrame(() => {
+      const el = inputRefs.current[clamped]
+      if (el) el.select()
+    })
+  }, [])
+
+  const handleMfaChange = (index: number, rawValue: string) => {
+    const digit = rawValue.replace(/\D/g, "").slice(-1)
+    setMfaCode((prev) => {
+      const next = [...prev]
+      next[index] = digit
+      return next
+    })
     setMfaError("")
-    if (value && index < 5) inputRefs.current[index + 1]?.focus()
+    if (digit && index < CODE_LENGTH - 1) focusInput(index + 1)
   }
 
-  const handleMfaKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backward-delete" && !mfaCode[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus()
+  const handleMfaKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      e.preventDefault()
+      setMfaCode((prev) => {
+        const next = [...prev]
+        if (next[index]) {
+          next[index] = ""
+        } else if (index > 0) {
+          next[index - 1] = ""
+          focusInput(index - 1)
+        }
+        return next
+      })
+      setMfaError("")
+      return
     }
-    if (e.key === "Enter") handleMfaSubmit()
+    if (e.key === "Delete") {
+      e.preventDefault()
+      setMfaCode((prev) => {
+        const next = [...prev]
+        next[index] = ""
+        return next
+      })
+      setMfaError("")
+      return
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault()
+      if (index > 0) focusInput(index - 1)
+      return
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault()
+      if (index < CODE_LENGTH - 1) focusInput(index + 1)
+      return
+    }
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleMfaSubmit()
+      return
+    }
+    if (e.key === "Tab") return
+  }
+
+  const handleMfaPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, CODE_LENGTH)
+    if (!pasted) return
+    setMfaCode((prev) => {
+      const next = [...prev]
+      for (let i = 0; i < CODE_LENGTH; i++) {
+        next[i] = pasted[i] || ""
+      }
+      return next
+    })
+    setMfaError("")
+    const lastFilled = Math.min(pasted.length, CODE_LENGTH) - 1
+    focusInput(lastFilled === CODE_LENGTH - 1 ? CODE_LENGTH - 1 : lastFilled + 1)
+  }
+
+  const handleMfaFocus = (index: number) => {
+    const el = inputRefs.current[index]
+    if (el) el.select()
   }
 
   const handleMfaSubmit = async () => {
     const code = mfaCode.join("")
-    if (code.length !== 6) { setMfaError(t("auth.mfa_error")); return }
+    if (code.length !== CODE_LENGTH) {
+      setMfaError(t("auth.mfa_error"))
+      return
+    }
     setIsMfaLoading(true)
     const error = await verifyMfa(code)
     setIsMfaLoading(false)
-    if (error) { setMfaError(error); setMfaCode(["", "", "", "", "", ""]); inputRefs.current[0]?.focus(); return }
+    if (error) {
+      setMfaError(error)
+      setMfaCode(Array(CODE_LENGTH).fill(""))
+      focusInput(0)
+    }
   }
 
   const onSubmit = async (data: LoginInput) => {
     setIsSubmitting(true)
     const error = await signIn(data.email, data.password)
     setIsSubmitting(false)
-    if (error) { toast.error(error); return }
+    if (error) toast.error(error)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50/50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
       <AnimatePresence mode="wait">
         {mfaPending ? (
           <motion.div
@@ -89,16 +168,27 @@ export default function LoginPage() {
             exit={{ opacity: 0, y: -10 }}
             className="w-full max-w-sm"
           >
-            <Card className="border-blue-200/50 shadow-lg shadow-blue-900/5">
+            <Card className="hard-shadow-md">
               <CardHeader className="text-center pb-2">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-sm bg-primary text-primary-foreground">
                   <ShieldCheck className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-xl">{t("auth.mfa_title")}</CardTitle>
                 <CardDescription>{t("auth.mfa_description")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-center gap-2">
+                {qrCode && (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="rounded-sm border border-border bg-white p-3">
+                      <img src={qrCode} alt="QR Code" className="w-48 h-48" />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      {t("auth.mfa_qr_hint")}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-center gap-1.5" onPaste={handleMfaPaste}>
                   {mfaCode.map((digit, i) => (
                     <Input
                       key={i}
@@ -109,8 +199,14 @@ export default function LoginPage() {
                       value={digit}
                       onChange={(e) => handleMfaChange(i, e.target.value)}
                       onKeyDown={(e) => handleMfaKeyDown(i, e)}
-                      className="w-12 h-14 text-center text-lg font-semibold"
+                      onFocus={() => handleMfaFocus(i)}
+                      className={cn(
+                        "w-11 h-13 text-center text-lg font-mono font-semibold",
+                        digit && "border-primary",
+                        mfaError && "border-destructive"
+                      )}
                       aria-label={`Digito ${i + 1} del código`}
+                      autoComplete="one-time-code"
                     />
                   ))}
                 </div>
@@ -118,7 +214,6 @@ export default function LoginPage() {
                 <Button className="w-full" onClick={handleMfaSubmit} disabled={isMfaLoading}>
                   {isMfaLoading ? t("auth.mfa_loading") : t("auth.mfa_submit")}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">{t("auth.mfa_resend")}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -130,9 +225,9 @@ export default function LoginPage() {
             exit={{ opacity: 0, y: -10 }}
             className="w-full max-w-sm"
           >
-            <Card className="border-blue-200/50 shadow-lg shadow-blue-900/5">
+            <Card className="hard-shadow-md">
               <CardHeader className="text-center pb-2">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-sm bg-primary text-primary-foreground">
                   <Container className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-xl">{t("auth.login_title")}</CardTitle>
@@ -179,12 +274,6 @@ export default function LoginPage() {
                   </Button>
                 </form>
 
-                {isDemo && (
-                  <div className="flex items-center justify-center gap-2 text-xs text-amber-500 border border-amber-200 bg-amber-50 rounded-lg px-3 py-2">
-                    <ShieldCheck className="h-3 w-3" />
-                    {t("auth.demo_badge")}
-                  </div>
-                )}
               </CardContent>
             </Card>
           </motion.div>

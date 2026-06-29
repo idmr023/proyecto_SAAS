@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { supabase, IS_DEMO, dockerOrchestrator } from "@/lib/config"
-import { toast } from "sonner"
+import { dockerOrchestrator } from "@/lib/config"
 
 export type UserRole = "admin" | "colaborador"
 
@@ -18,13 +17,13 @@ interface AuthContextType {
   session: boolean
   user: { email: string; id: string; name?: string; role: UserRole } | null
   loading: boolean
-  isDemo: boolean
   signIn: (email: string, password: string) => Promise<string | null>
   verifyMfa: (code: string) => Promise<string | null>
   signOut: () => Promise<void>
   mfaPending: boolean
   setMfaPending: (v: boolean) => void
   pendingEmail: string
+  qrCode: string | null
 }
 
 const AUTH_KEY = "saas_orchestrator_session"
@@ -56,14 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [mfaPending, setMfaPending] = useState(false)
   const [pendingEmail, setPendingEmail] = useState("")
+  const [qrCode, setQrCode] = useState<string | null>(null)
 
-  // Verificar sesión activa vía cookie/httpOnly en el backend
   useEffect(() => {
-    if (IS_DEMO) {
-      setLoading(false)
-      return
-    }
-
     async function checkSession() {
       try {
         const res = await dockerOrchestrator.get("/api/auth/session")
@@ -72,11 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = { id, email, role }
           setUser(userData)
           setSession(true)
-          // Sincronizar localStorage con datos frescos
           localStorage.setItem(AUTH_KEY, JSON.stringify({ token: "", user: userData }))
         }
       } catch {
-        // No hay sesión activa en el backend
         localStorage.removeItem(AUTH_KEY)
         setUser(null)
         setSession(false)
@@ -89,29 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string): Promise<string | null> => {
-    if (IS_DEMO || !supabase) {
-      if (email.includes("colab")) {
-        const data: StoredSession = {
-          token: "demo-token-" + Date.now(),
-          user: { email, id: "demo-" + Date.now(), name: email.split("@")[0], role: "colaborador" },
-        }
-        localStorage.setItem(AUTH_KEY, JSON.stringify(data))
-        setUser(data.user)
-        setSession(true)
-        return null
-      }
-      setPendingEmail(email)
-      setMfaPending(true)
-      toast.success("Código enviado a " + email)
-      return null
-    }
-
     try {
       const res = await dockerOrchestrator.post("/api/auth/login", { email, password })
       if (res.data.mfaRequired) {
         setPendingEmail(email)
         setMfaPending(true)
-        toast.success("Código enviado a " + email)
+        setQrCode(res.data.qrCode || null)
         return null
       }
       if (res.data.token) {
@@ -127,7 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(AUTH_KEY, JSON.stringify(data))
         setUser(data.user)
         setSession(true)
-        toast.success("Sesión iniciada")
         return null
       }
     } catch (err: any) {
@@ -141,70 +115,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const verifyMfa = async (code: string): Promise<string | null> => {
     if (!pendingEmail) return "No hay sesión pendiente"
 
-    if (!IS_DEMO) {
-      try {
-        const res = await dockerOrchestrator.post("/api/auth/verify-mfa", {
-          email: pendingEmail,
-          code,
-        })
-        if (res.data.token) {
-          const data: StoredSession = {
-            token: res.data.token,
-            user: {
-              email: res.data.admin.email,
-              id: res.data.admin.id,
-              name: res.data.admin.nombre,
-              role: res.data.admin.role ?? "admin",
-            },
-          }
-          localStorage.setItem(AUTH_KEY, JSON.stringify(data))
-          setUser(data.user)
-          setSession(true)
-          setMfaPending(false)
-          setPendingEmail("")
-          return null
+    try {
+      const res = await dockerOrchestrator.post("/api/auth/verify-mfa", {
+        email: pendingEmail,
+        code,
+      })
+      if (res.data.token) {
+        const data: StoredSession = {
+          token: res.data.token,
+          user: {
+            email: res.data.admin.email,
+            id: res.data.admin.id,
+            name: res.data.admin.nombre,
+            role: res.data.admin.role ?? "admin",
+          },
         }
-      } catch (err: any) {
-        const msg = err?.response?.data?.error || "Código inválido o expirado"
-        return msg
+        localStorage.setItem(AUTH_KEY, JSON.stringify(data))
+        setUser(data.user)
+        setSession(true)
+        setMfaPending(false)
+        setPendingEmail("")
+        setQrCode(null)
+        return null
       }
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || "Código inválido o expirado"
+      return msg
     }
 
-    if (code !== "123456") return "Código inválido"
-
-    const role: UserRole = pendingEmail.includes("colab") ? "colaborador" : "admin"
-    const userData = {
-      email: pendingEmail,
-      id: "demo-" + Date.now(),
-      name: pendingEmail.split("@")[0],
-      role,
-    }
-    const data: StoredSession = { token: "demo-token-" + Date.now(), user: userData }
-    localStorage.setItem(AUTH_KEY, JSON.stringify(data))
-    setUser(userData)
-    setSession(true)
-    setMfaPending(false)
-    setPendingEmail("")
-    return null
+    return "Error inesperado"
   }
 
   const signOut = async () => {
-    if (!IS_DEMO) {
-      try {
-        await dockerOrchestrator.post("/api/auth/logout")
-      } catch {
-        // ignore
-      }
+    try {
+      await dockerOrchestrator.post("/api/auth/logout")
+    } catch {
+      // ignore
     }
     localStorage.removeItem(AUTH_KEY)
     setSession(false)
     setUser(null)
     setMfaPending(false)
     setPendingEmail("")
+    setQrCode(null)
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, isDemo: IS_DEMO, signIn, verifyMfa, signOut, mfaPending, setMfaPending, pendingEmail }}>
+    <AuthContext.Provider value={{ session, user, loading, signIn, verifyMfa, signOut, mfaPending, setMfaPending, pendingEmail, qrCode }}>
       {children}
     </AuthContext.Provider>
   )

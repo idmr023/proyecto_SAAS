@@ -10,7 +10,6 @@ import {
   LogOut,
   Moon,
   Sun,
-  Sparkles,
   TicketCheck,
   Eye,
 } from "lucide-react"
@@ -26,7 +25,7 @@ const navItems = [
 
 export default function Navbar() {
   const { t } = useTranslation()
-  const { signOut, user, isDemo } = useAuth()
+  const { signOut, user } = useAuth()
   const { theme, toggle } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
@@ -37,10 +36,10 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border bg-background">
       <div className="flex h-14 items-center px-4 lg:px-6">
-        <Link to="/dashboard" className="flex items-center gap-2 font-semibold mr-4 lg:mr-8">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm">
+        <Link to="/dashboard" className="flex items-center gap-2 font-bold mr-4 lg:mr-8 tracking-tight">
+          <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary text-primary-foreground">
             <Container className="h-4 w-4" />
           </div>
           <span className="hidden sm:inline">{t("app.name")}</span>
@@ -61,7 +60,7 @@ export default function Navbar() {
                   <Icon className="h-4 w-4" />
                   <span className="hidden sm:inline">{t(labelKey)}</span>
                   {isActive && (
-                    <span className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-primary" />
+                    <span className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 bg-primary" />
                   )}
                 </Link>
               </Button>
@@ -79,13 +78,6 @@ export default function Navbar() {
         <div className="ml-auto flex items-center gap-1.5">
           <MobileNav />
 
-          {isDemo && (
-            <span className="hidden sm:flex items-center gap-1 text-xs text-amber-500 mr-2">
-              <Sparkles className="h-3 w-3" />
-              {t("nav.demo")}
-            </span>
-          )}
-
           <Button
             variant="ghost"
             size="icon"
@@ -96,7 +88,7 @@ export default function Navbar() {
             {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
 
-          <span className="hidden md:inline text-sm text-muted-foreground truncate max-w-[120px] mx-1">
+          <span className="hidden md:inline text-sm text-muted-foreground font-mono truncate max-w-[120px] mx-1">
             {user?.email}
           </span>
 

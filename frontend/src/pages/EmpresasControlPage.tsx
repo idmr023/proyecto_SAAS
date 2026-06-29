@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -130,67 +130,58 @@ export default function EmpresasControlPage() {
           {filtered.map((empresa, i) => (
             <motion.div
               key={empresa.id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06, duration: 0.3 }}
+              transition={{ delay: i * 0.05, duration: 0.25 }}
             >
               <Card className={cn(
-                "overflow-hidden border-0 shadow-md hover:shadow-lg transition-all",
-                empresa.status === "error" && "ring-1 ring-red-200",
+                "transition-all hover:border-primary/50",
+                empresa.status === "error" && "border-destructive/40",
                 empresa.status === "stopped" && "opacity-75",
               )}>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 border-b border-border">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-lg",
-                        empresa.rubro === "Bodega" && "bg-amber-50 text-amber-600",
-                        empresa.rubro === "Restaurante" && "bg-rose-50 text-rose-600",
-                        empresa.rubro === "Textil" && "bg-indigo-50 text-indigo-600",
+                        "flex h-10 w-10 items-center justify-center rounded-sm border",
+                        empresa.rubro === "Bodega" && "bg-amber-500/10 text-amber-700 border-amber-700/20",
+                        empresa.rubro === "Restaurante" && "bg-rose-500/10 text-rose-700 border-rose-700/20",
+                        empresa.rubro === "Textil" && "bg-indigo-500/10 text-indigo-700 border-indigo-700/20",
                       )}>
                         {RUBRO_ICONS[empresa.rubro]}
                       </div>
                       <div>
-                        <CardTitle className="text-sm font-semibold">{empresa.name}</CardTitle>
+                        <h3 className="text-sm font-semibold tracking-tight">{empresa.name}</h3>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-muted-foreground">{empresa.rubro}</span>
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{empresa.rubro}</span>
                           <span className="text-[10px] text-muted-foreground">·</span>
-                          <span className="text-[10px] text-muted-foreground">{empresa.region}</span>
+                          <span className="text-[10px] text-muted-foreground font-mono">{empresa.region}</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span
                         className={cn(
-                          "h-2 w-2 rounded-full animate-ping absolute",
-                          empresa.status === "running" && "bg-emerald-500",
-                          empresa.status === "error" && "bg-red-500",
-                          empresa.status === "stopped" && "bg-amber-500",
-                          empresa.status === "deploying" && "bg-blue-500",
-                        )}
-                      />
-                      <span
-                        className={cn(
-                          "h-2 w-2 rounded-full relative",
-                          empresa.status === "running" && "bg-emerald-500",
-                          empresa.status === "error" && "bg-red-500",
-                          empresa.status === "stopped" && "bg-amber-500",
-                          empresa.status === "deploying" && "bg-blue-500",
+                          "h-2 w-2 rounded-full",
+                          empresa.status === "running" && "bg-emerald-600",
+                          empresa.status === "error" && "bg-red-600",
+                          empresa.status === "stopped" && "bg-amber-600",
+                          empresa.status === "deploying" && "bg-primary",
                         )}
                       />
                       <span className={cn(
-                        "text-[10px] font-medium",
-                        empresa.status === "running" && "text-emerald-600",
-                        empresa.status === "error" && "text-red-600",
-                        empresa.status === "stopped" && "text-amber-600",
+                        "text-[10px] font-medium uppercase tracking-wide",
+                        empresa.status === "running" && "text-emerald-700",
+                        empresa.status === "error" && "text-red-700",
+                        empresa.status === "stopped" && "text-amber-700",
                       )}>
                         {empresa.status === "running" ? t("empresas.online") : t("empresas.offline")}
                       </span>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <CardContent className="space-y-3 pt-3">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
                     <div className="flex items-center gap-1">
                       <Cpu className="h-3 w-3" />
                       {t("empresas.cpu")}: {empresa.cpu}%
@@ -207,13 +198,13 @@ export default function EmpresasControlPage() {
 
                   <div className="flex flex-wrap gap-1">
                     {empresa.modules.map((modId) => (
-                      <Badge key={modId} variant="secondary" className="text-[9px] h-4 px-1.5">
+                      <Badge key={modId} variant="outline" className="text-[9px] h-4 px-1.5 font-mono">
                         {modId.split("-").pop()}
                       </Badge>
                     ))}
                   </div>
 
-                  <div className="flex items-center gap-1.5 pt-1">
+                  <div className="flex items-center gap-1.5 pt-1 border-t border-border">
                     {empresa.url && empresa.status === "running" && (
                       <Button
                         variant="default"
@@ -296,11 +287,11 @@ export default function EmpresasControlPage() {
               <Terminal className="h-4 w-4" />
               {t("empresas.modal_logs_title")} {logsModal?.name}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="font-mono">
               {logsModal?.subdomain}.saas.local
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg bg-black/90 p-3 font-mono text-[11px] leading-relaxed max-h-[300px] overflow-y-auto space-y-1">
+          <div className="rounded-sm bg-[#0a0a0a] border border-border p-3 font-mono text-[11px] leading-relaxed max-h-[300px] overflow-y-auto space-y-1">
             {(logsModal ? MOCK_LOGS[logsModal.id] : null)?.length ? (
               (logsModal ? MOCK_LOGS[logsModal.id] : []).map((log, i) => (
                 <div

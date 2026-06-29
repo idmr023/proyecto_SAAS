@@ -9,6 +9,7 @@ const deploySchema = z.object({
   rubro: z.string().min(2, 'Rubro requerido'),
   subdominio: z.string().min(2, 'Subdominio requerido').regex(/^[a-z0-9-]+$/, 'Solo minúsculas, números y guiones'),
   modulos: z.array(z.string()).min(1, 'Selecciona al menos un módulo'),
+  brandName: z.string().min(2).optional(),
 });
 
 export async function deploy(req: AuthRequest, res: Response): Promise<void> {
@@ -19,7 +20,7 @@ export async function deploy(req: AuthRequest, res: Response): Promise<void> {
       return;
     }
 
-    const { nombre, rubro, subdominio, modulos } = parsed.data;
+    const { nombre, rubro, subdominio, modulos, brandName } = parsed.data;
     const adminId = req.admin!.adminId;
 
     const existing = await prisma.mypeEmpresa.findUnique({ where: { subdominio } });
@@ -45,7 +46,7 @@ export async function deploy(req: AuthRequest, res: Response): Promise<void> {
       include: { modulos: true },
     });
 
-    const dockerResult = deployContainer(empresa.id, subdominio, modulos);
+    const dockerResult = deployContainer(empresa.id, subdominio, modulos, brandName || nombre);
 
     await prisma.contenedorLog.create({
       data: {

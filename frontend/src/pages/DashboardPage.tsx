@@ -14,7 +14,7 @@ const MOCK_EMPRESAS = [
   { id: "6", name: "Textil Mundo", rubro: "Textil", status: "running", region: "Lima", cpu: 22, memory: 0.7 },
 ]
 
-const PIE_COLORS = ["#22c55e", "#eab308", "#ef4444"]
+const PIE_COLORS = ["#0f766e", "#b45309", "#b91c1c"]
 
 const regions = [
   { name: "Lima", empresas: 3, x: 45, y: 55 },
@@ -42,10 +42,10 @@ export default function DashboardPage() {
   ]
 
   const kpiCards = [
-    { label: t("dashboard.total_empresas"), value: stats.total, icon: Building2, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: t("dashboard.cpu_memoria"), value: `${stats.totalCpu}% / ${stats.totalMemory}GB`, icon: Cpu, color: "text-violet-600", bg: "bg-violet-50" },
-    { label: t("dashboard.planes_activos"), value: stats.running, icon: CreditCard, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { label: t("dashboard.total"), value: `${stats.running + stats.stopped}/${stats.total}`, icon: Activity, color: "text-amber-600", bg: "bg-amber-50" },
+    { label: t("dashboard.total_empresas"), value: stats.total, icon: Building2, color: "text-primary", border: "border-primary/30" },
+    { label: t("dashboard.cpu_memoria"), value: `${stats.totalCpu}% / ${stats.totalMemory}GB`, icon: Cpu, color: "text-primary", border: "border-primary/30" },
+    { label: t("dashboard.planes_activos"), value: stats.running, icon: CreditCard, color: "text-emerald-700", border: "border-emerald-700/30" },
+    { label: t("dashboard.total"), value: `${stats.running + stats.stopped}/${stats.total}`, icon: Activity, color: "text-amber-700", border: "border-amber-700/30" },
   ]
 
   return (
@@ -59,21 +59,19 @@ export default function DashboardPage() {
         {kpiCards.map((kpi, i) => (
           <motion.div
             key={kpi.label}
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08, duration: 0.35 }}
+            transition={{ delay: i * 0.06, duration: 0.25 }}
           >
-            <Card className="overflow-hidden border-0 shadow-md">
+            <Card className={`border-l-[3px] ${kpi.border}`}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {kpi.label}
                 </CardTitle>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${kpi.bg}`}>
-                  <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
-                </div>
+                <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</div>
+                <div className={`text-2xl font-bold font-mono ${kpi.color}`}>{kpi.value}</div>
               </CardContent>
             </Card>
           </motion.div>
@@ -82,12 +80,12 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
         >
-          <Card className="border-0 shadow-md">
-            <CardHeader>
+          <Card>
+            <CardHeader className="border-b border-border">
               <div className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-muted-foreground" />
                 <CardTitle className="text-sm">{t("dashboard.distribucion")}</CardTitle>
@@ -103,7 +101,7 @@ export default function DashboardPage() {
                       cy="50%"
                       innerRadius={60}
                       outerRadius={100}
-                      paddingAngle={4}
+                      paddingAngle={2}
                       dataKey="value"
                       animationBegin={400}
                       animationDuration={800}
@@ -113,18 +111,18 @@ export default function DashboardPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                      contentStyle={{ borderRadius: "2px", border: "1px solid var(--border)", boxShadow: "4px 4px 0px 0px var(--foreground)" }}
                       formatter={(value) => [value] as unknown as string}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex justify-center gap-6 mt-2">
+              <div className="flex justify-center gap-6 mt-2 border-t border-border pt-3">
                 {pieData.map((entry) => (
                   <div key={entry.name} className="flex items-center gap-2 text-xs">
-                    <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                    <div className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: entry.color }} />
                     <span className="text-muted-foreground">{entry.name}</span>
-                    <span className="font-medium">{entry.value}</span>
+                    <span className="font-mono font-medium">{entry.value}</span>
                   </div>
                 ))}
               </div>
@@ -133,41 +131,41 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
+          transition={{ delay: 0.3, duration: 0.3 }}
         >
-          <Card className="border-0 shadow-md">
-            <CardHeader>
+          <Card>
+            <CardHeader className="border-b border-border">
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 text-muted-foreground" />
                 <CardTitle className="text-sm">{t("dashboard.mapa")}</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="relative h-[260px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 overflow-hidden">
+              <div className="relative h-[260px] rounded-sm bg-secondary/50 border border-border overflow-hidden">
                 <svg viewBox="0 0 200 130" className="w-full h-full">
                   <path
                     d="M20 30 Q50 10 100 15 Q150 20 180 35 L190 100 Q150 115 100 120 Q50 125 15 105 Z"
                     fill="none"
-                    stroke="#93c5fd"
+                    stroke="oklch(0.6 0.039 257.298)"
                     strokeWidth="0.5"
                     className="opacity-40"
                   />
                   {regions.map((r) => (
                     <g key={r.name}>
-                      <circle cx={r.x} cy={r.y} r={8 + r.empresas * 2} fill="#3B82F6" fillOpacity="0.15" />
-                      <circle cx={r.x} cy={r.y} r={4 + r.empresas} fill="#3B82F6" fillOpacity="0.35" />
-                      <circle cx={r.x} cy={r.y} r={2} fill="#1E3A8A" />
-                      <text x={r.x} y={r.y - 12} textAnchor="middle" fontSize="3.5" fill="#1E40AF" fontWeight="600">
+                      <circle cx={r.x} cy={r.y} r={8 + r.empresas * 2} fill="oklch(0.546 0.039 257.298)" fillOpacity="0.12" />
+                      <circle cx={r.x} cy={r.y} r={4 + r.empresas} fill="oklch(0.546 0.039 257.298)" fillOpacity="0.3" />
+                      <circle cx={r.x} cy={r.y} r={2} fill="oklch(0.372 0.039 257.298)" />
+                      <text x={r.x} y={r.y - 12} textAnchor="middle" fontSize="3.5" fill="oklch(0.372 0.039 257.298)" fontWeight="600">
                         {r.name}
                       </text>
-                      <text x={r.x} y={r.y + 4} textAnchor="middle" fontSize="3" fill="#64748b">
+                      <text x={r.x} y={r.y + 4} textAnchor="middle" fontSize="3" fill="oklch(0.552 0.016 285.938)" className="font-mono">
                         {r.empresas} emp.
                       </text>
                     </g>
                   ))}
-                  <text x={100} y={122} textAnchor="middle" fontSize="3.5" fill="#94a3b8">
+                  <text x={100} y={122} textAnchor="middle" fontSize="3.5" fill="oklch(0.552 0.016 285.938)">
                     Distribución de servidores por región
                   </text>
                 </svg>

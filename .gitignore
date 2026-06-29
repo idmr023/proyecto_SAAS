@@ -28,3 +28,6 @@ storybook-static
 
 # Environment files with secrets
 .env
+
+# Build output for Mype containers
+builds/

@@ -188,16 +188,16 @@ export default function GeneratorPage() {
                       type="button"
                       onClick={() => setRubro(r.id)}
                       className={cn(
-                        "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
+                        "flex flex-col items-center gap-2 rounded-sm border p-4 transition-all",
                         selected
-                          ? "border-blue-500 bg-blue-50 shadow-sm shadow-blue-500/10"
-                          : "border-border hover:border-blue-200 hover:bg-blue-50/50",
+                          ? "border-primary bg-accent"
+                          : "border-border hover:border-primary/50 hover:bg-accent/50",
                       )}
                     >
-                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", selected ? "bg-blue-500 text-white" : "bg-muted text-muted-foreground")}>
+                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-sm border", selected ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-muted-foreground border-border")}>
                         {getRubroIcon(r.icon)}
                       </div>
-                      <span className={cn("text-xs font-medium", selected ? "text-blue-700" : "text-muted-foreground")}>
+                      <span className={cn("text-xs font-medium uppercase tracking-wide", selected ? "text-accent-foreground" : "text-muted-foreground")}>
                         {t(r.nameKey)}
                       </span>
                     </button>
@@ -246,7 +246,7 @@ export default function GeneratorPage() {
                 <Button variant="ghost" size="sm" className="text-xs h-8" onClick={deselectAllModules}>
                   {t("generator.deselect_all")}
                 </Button>
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs font-mono">
                   {selectedModules.length} {t("generator.modules_selected")}
                 </Badge>
               </div>
@@ -262,16 +262,16 @@ export default function GeneratorPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-h-[420px] overflow-y-auto pr-1">
                 {categories.map((cat) => (
-                  <Card key={cat.id} className="overflow-hidden border-0 shadow-sm">
-                    <CardHeader className="pb-2 pt-3 px-3">
+                  <Card key={cat.id}>
+                    <CardHeader className="pb-2 pt-3 px-3 border-b border-border">
                       <div className="flex items-center gap-2">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary/10 text-primary border border-primary/20">
                           {getIcon(cat.icon, "h-3.5 w-3.5")}
                         </div>
-                        <CardTitle className="text-xs font-medium">{cat.name}</CardTitle>
+                        <CardTitle className="text-xs font-medium uppercase tracking-wide">{cat.name}</CardTitle>
                       </div>
                     </CardHeader>
-                    <CardContent className="px-3 pb-3 space-y-1">
+                    <CardContent className="px-3 pb-3 space-y-1 pt-2">
                       {cat.modules.map((mod) => {
                         const isSelected = selectedModules.includes(mod.id)
                         return (
@@ -280,16 +280,16 @@ export default function GeneratorPage() {
                             type="button"
                             onClick={() => toggleModule(mod.id)}
                             className={cn(
-                              "flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-all",
+                              "flex w-full items-center gap-2 rounded-sm border px-2.5 py-2 text-left text-xs transition-all",
                               isSelected
-                                ? "border-blue-300 bg-blue-50 text-blue-700"
-                                : "border-transparent bg-muted/50 hover:bg-muted text-muted-foreground",
+                                ? "border-primary bg-accent text-accent-foreground"
+                                : "border-transparent bg-secondary/50 hover:bg-secondary text-muted-foreground",
                             )}
                           >
                             <div
                               className={cn(
-                                "flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors",
-                                isSelected ? "border-blue-500 bg-blue-500 text-white" : "border-muted-foreground/30",
+                                "flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border transition-colors",
+                                isSelected ? "border-primary bg-primary text-primary-foreground" : "border-border",
                               )}
                             >
                               {isSelected && <Check className="h-3 w-3" />}
@@ -297,7 +297,7 @@ export default function GeneratorPage() {
                             <div className="flex-1 min-w-0">
                               <span className="font-medium">{mod.name}</span>
                             </div>
-                            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted-foreground/10">
+                            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-muted-foreground/10">
                               {getIcon(mod.icon, "h-3 w-3")}
                             </div>
                           </button>
@@ -320,19 +320,19 @@ export default function GeneratorPage() {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6 max-w-2xl mx-auto py-4"
           >
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white">
+            <Card className="bg-accent/30">
               <CardContent className="pt-6 space-y-3">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500 text-white shadow-md">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary text-primary-foreground hard-shadow-xs">
                     <Building2 className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-base">{name}</h3>
+                    <h3 className="font-semibold text-base tracking-tight">{name}</h3>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="secondary" className="text-[10px] h-5">
+                      <Badge variant="secondary" className="text-[10px] h-5 uppercase tracking-wide">
                         {rubro && `generator.rubro_${rubro}` ? t(`generator.rubro_${rubro}` as unknown as TemplateStringsArray) : rubro}
                       </Badge>
-                      <span>{subdomain}.saas.local</span>
+                      <span className="font-mono">{subdomain}.saas.local</span>
                     </div>
                   </div>
                 </div>
@@ -340,7 +340,7 @@ export default function GeneratorPage() {
                   {selectedModules.map((modId) => {
                     const found = categories.flatMap((c) => c.modules).find((m) => m.id === modId)
                     return found ? (
-                      <Badge key={modId} variant="secondary" className="text-[10px] gap-1 h-5">
+                      <Badge key={modId} variant="outline" className="text-[10px] gap-1 h-5">
                         {getIcon(found.icon, "h-3 w-3")}
                         {found.name}
                       </Badge>
@@ -352,7 +352,7 @@ export default function GeneratorPage() {
 
             {!deploying && !deployComplete && (
               <Button
-                className="w-full h-11 text-base gap-2 bg-blue-600 hover:bg-blue-700"
+                className="w-full h-11 text-base gap-2"
                 onClick={handleDeploy}
               >
                 <Server className="h-5 w-5" />
@@ -361,22 +361,22 @@ export default function GeneratorPage() {
             )}
 
             {(deploying || deployComplete) && (
-              <Card className="border-0 shadow-sm">
+              <Card>
                 <CardContent className="pt-6 space-y-4">
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">{t("generator.deploy_title")}</span>
-                      <span className="text-muted-foreground">{progress}%</span>
+                      <span className="font-medium uppercase tracking-wide text-xs">{t("generator.deploy_title")}</span>
+                      <span className="text-muted-foreground font-mono">{progress}%</span>
                     </div>
                     <Progress value={progress} className="h-2" />
                   </div>
 
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
+                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">
                       <Terminal className="h-3.5 w-3.5" />
                       {t("generator.deploy_log")}
                     </div>
-                    <div className="rounded-lg bg-black/90 p-3 font-mono text-[11px] leading-relaxed max-h-[200px] overflow-y-auto space-y-0.5">
+                    <div className="rounded-sm bg-[#0a0a0a] border border-border p-3 font-mono text-[11px] leading-relaxed max-h-[200px] overflow-y-auto space-y-0.5">
                       {logs.map((log, i) => (
                         <div
                           key={i}
@@ -408,7 +408,7 @@ export default function GeneratorPage() {
                   </div>
 
                   {deployComplete && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2 text-sm text-emerald-600 font-medium">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2 text-sm text-emerald-700 font-medium uppercase tracking-wide">
                       <CheckCircle2 className="h-4 w-4" />
                       {t("generator.deploy_success")}
                     </motion.div>
@@ -439,17 +439,17 @@ export default function GeneratorPage() {
                 <div className="flex flex-col items-center gap-1.5">
                   <div
                     className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold border-2 transition-all",
-                      isActive && "border-blue-500 bg-blue-500 text-white shadow-md shadow-blue-500/20",
-                      isCompleted && "border-emerald-500 bg-emerald-500 text-white",
-                      !isActive && !isCompleted && "border-muted-foreground/30 text-muted-foreground bg-background",
+                      "flex h-9 w-9 items-center justify-center rounded-sm border-2 transition-all",
+                      isActive && "border-primary bg-primary text-primary-foreground hard-shadow-xs",
+                      isCompleted && "border-emerald-700 bg-emerald-700 text-white",
+                      !isActive && !isCompleted && "border-border text-muted-foreground bg-background",
                     )}
                   >
                     {isCompleted ? <Check className="h-4 w-4" /> : <StepIcon className="h-4 w-4" />}
                   </div>
                   <span
                     className={cn(
-                      "text-[10px] font-medium whitespace-nowrap",
+                      "text-[10px] font-medium whitespace-nowrap uppercase tracking-wide",
                       isActive || isCompleted ? "text-foreground" : "text-muted-foreground",
                     )}
                   >
@@ -459,8 +459,8 @@ export default function GeneratorPage() {
                 {i < stepLabels.length - 1 && (
                   <div
                     className={cn(
-                      "flex-1 h-0.5 mx-3 mt-[-20px]",
-                      step > i ? "bg-emerald-400" : "bg-muted-foreground/20",
+                      "flex-1 h-px mx-3 mt-[-20px]",
+                      step > i ? "bg-emerald-700" : "bg-border",
                     )}
                   />
                 )}

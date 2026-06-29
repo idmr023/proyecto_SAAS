@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Loader2, Send, CheckCircle2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { IS_DEMO } from "@/lib/config"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 const rubros = ["Bodega", "Restaurante", "Textil", "Ventas", "Otro"]
 
@@ -45,13 +45,6 @@ export default function SolicitarSistemaModal({ open, onOpenChange }: Props) {
       return
     }
     setSubmitting(true)
-
-    if (IS_DEMO) {
-      await new Promise((r) => setTimeout(r, 1000))
-      setSubmitting(false)
-      setSent(true)
-      return
-    }
 
     try {
       const { dockerOrchestrator } = await import("@/lib/config")
@@ -89,10 +82,10 @@ export default function SolicitarSistemaModal({ open, onOpenChange }: Props) {
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center py-8 text-center"
             >
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-sm bg-emerald-500/15 border border-emerald-700/30">
+                <CheckCircle2 className="h-8 w-8 text-emerald-700" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Solicitud Enviada</h3>
+              <h3 className="text-lg font-semibold mb-2 tracking-tight">Solicitud Enviada</h3>
               <p className="text-sm text-muted-foreground max-w-sm">
                 Solicitud Enviada correctamente. Uno de nuestros colaboradores se pondrá en contacto contigo tan pronto.
               </p>
@@ -108,7 +101,7 @@ export default function SolicitarSistemaModal({ open, onOpenChange }: Props) {
               exit={{ opacity: 0 }}
             >
               <DialogHeader>
-                <DialogTitle>Solicitar Sistema</DialogTitle>
+                <DialogTitle className="tracking-tight">Solicitar Sistema</DialogTitle>
                 <DialogDescription>
                   Cuéntanos qué necesita tu empresa y te prepararemos una solución a medida.
                 </DialogDescription>
@@ -149,16 +142,18 @@ export default function SolicitarSistemaModal({ open, onOpenChange }: Props) {
                           key={m.id}
                           type="button"
                           onClick={() => toggleModulo(m.id)}
-                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                          className={cn(
+                            "flex items-center gap-2 rounded-sm border px-3 py-2 text-sm transition-colors",
                             selected
-                              ? "border-blue-600 bg-blue-50 text-blue-700"
-                              : "border-border hover:bg-accent"
-                          }`}
+                              ? "border-primary bg-accent text-accent-foreground"
+                              : "border-border hover:bg-accent/50"
+                          )}
                         >
-                          <div className={`h-4 w-4 rounded border flex items-center justify-center transition-colors ${
-                            selected ? "bg-blue-600 border-blue-600" : "border-muted-foreground"
-                          }`}>
-                            {selected && <span className="text-white text-[10px]">✓</span>}
+                          <div className={cn(
+                            "h-4 w-4 rounded-sm border flex items-center justify-center transition-colors",
+                            selected ? "bg-primary border-primary" : "border-border"
+                          )}>
+                            {selected && <span className="text-primary-foreground text-[10px]">✓</span>}
                           </div>
                           {m.label}
                         </button>

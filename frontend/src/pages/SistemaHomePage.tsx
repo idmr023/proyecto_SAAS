@@ -11,10 +11,10 @@ import { toast } from "sonner"
 const container = "max-w-6xl mx-auto px-4 lg:px-6"
 
 const fadeUp = {
-  initial: { opacity: 0, y: 24 },
+  initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-80px" as const },
-  transition: { duration: 0.5, ease: "easeOut" as const },
+  transition: { duration: 0.4, ease: "easeOut" as const },
 }
 
 const benefits = [
@@ -65,43 +65,42 @@ export default function SistemaHomePage() {
     <div className="overflow-hidden">
 
       {/* ───── Hero ───── */}
-      <section className="relative bg-gradient-to-br from-[#0F172A] via-[#1E3A8A] to-[#1E40AF] text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.15),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')]" />
+      <section className="relative bg-[#0a0e1a] text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.08),transparent_50%)]" />
         <div className={`${container} relative pt-24 pb-20 md:pt-32 md:pb-28 text-center`}>
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-xs font-medium text-blue-200 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/15 rounded-sm px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-primary mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Plataforma lista para producción
             </div>
           </motion.div>
           <motion.h1
             className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4 leading-tight"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
             {t("sistema.hero_title")}
           </motion.h1>
           <motion.p
-            className="text-lg md:text-xl text-blue-200/90 max-w-2xl mx-auto mb-10 leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
+            className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed"
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
             {t("sistema.hero_desc")}
           </motion.p>
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Button asChild size="lg" className="bg-white text-[#1E3A8A] hover:bg-blue-50 shadow-xl hover:shadow-2xl text-base px-8 h-12 rounded-xl transition-all">
+            <Button asChild size="lg" className="bg-white text-[#0a0e1a] hover:bg-white/90 hard-shadow-md hover:hard-shadow-lg text-base px-8 h-12">
               <Link to="/sistema/venta">
                 {t("sistema.hero_cta")}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -109,7 +108,8 @@ export default function SistemaHomePage() {
             </Button>
             <Button
               size="lg"
-              className="bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20 text-base px-8 h-12 rounded-xl shadow-lg transition-all"
+              variant="outline"
+              className="bg-transparent text-white border-white/30 hover:bg-white/10 hover:text-white hover:border-white/50 text-base px-8 h-12"
               onClick={() => scrollTo("contact")}
             >
               {t("sistema.contact_title")}
@@ -120,45 +120,45 @@ export default function SistemaHomePage() {
         {/* KPI bar */}
         <div className={`${container} relative pb-8`}>
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10"
-            initial={{ opacity: 0, y: 20 }}
+            className="grid grid-cols-2 md:grid-cols-4 border border-white/10 rounded-sm overflow-hidden"
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.45 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
           >
             {stats.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="bg-[#0F172A]/60 backdrop-blur-sm p-5 text-center">
-                <Icon className="w-5 h-5 mx-auto text-blue-400 mb-2" />
-                <div className="text-2xl font-bold text-white">{value}</div>
-                <div className="text-xs text-blue-300/80 mt-0.5">{label}</div>
+              <div key={label} className="bg-white/5 p-5 text-center border-r border-white/10 last:border-r-0">
+                <Icon className="w-5 h-5 mx-auto text-primary mb-2" />
+                <div className="text-2xl font-bold text-white font-mono">{value}</div>
+                <div className="text-xs text-slate-500 mt-0.5 uppercase tracking-wide">{label}</div>
               </div>
             ))}
           </motion.div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* ───── Benefits ───── */}
       <section id="beneficios" className={`${container} py-20 md:py-28`}>
         <motion.div className="text-center mb-14" {...fadeUp}>
-          <span className="text-xs font-semibold text-blue-600 uppercase tracking-widest">Ventajas</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("sistema.benefits_title")}</h2>
+          <span className="text-xs font-semibold text-primary uppercase tracking-widest">Ventajas</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 tracking-tight">{t("sistema.benefits_title")}</h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">Todo lo que necesitas para digitalizar tu negocio en un solo lugar.</p>
         </motion.div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {benefits.map(({ key, icon: Icon }, i) => (
             <motion.div
               key={key}
-              className="group bg-card rounded-xl p-6 border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-              initial={{ opacity: 0, y: 24 }}
+              className="group bg-card rounded-sm p-6 border border-border hover:border-primary/50 hover:hard-shadow-sm transition-all duration-200"
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
+              transition={{ duration: 0.3, delay: i * 0.06 }}
             >
-              <div className="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors duration-300">
-                <Icon className="w-5 h-5 text-blue-600 group-hover:text-white transition-colors duration-300" />
+              <div className="w-11 h-11 bg-secondary border border-border rounded-sm flex items-center justify-center mb-4 group-hover:bg-primary group-hover:border-primary transition-colors duration-200">
+                <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-200" />
               </div>
-              <h3 className="font-semibold text-foreground mb-1.5">{t(`sistema.${key}_title`)}</h3>
+              <h3 className="font-semibold text-foreground mb-1.5 tracking-tight">{t(`sistema.${key}_title`)}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{t(`sistema.${key}_desc`)}</p>
             </motion.div>
           ))}
@@ -166,33 +166,33 @@ export default function SistemaHomePage() {
       </section>
 
       {/* ───── Projects ───── */}
-      <section id="proyectos" className="bg-muted/40 py-20 md:py-28">
+      <section id="proyectos" className="bg-muted/40 py-20 md:py-28 border-y border-border">
         <div className={container}>
           <motion.div className="text-center mb-14" {...fadeUp}>
-            <span className="text-xs font-semibold text-blue-600 uppercase tracking-widest">Portafolio</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("sistema.projects_title")}</h2>
+            <span className="text-xs font-semibold text-primary uppercase tracking-widest">Portafolio</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 tracking-tight">{t("sistema.projects_title")}</h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">Conoce algunos de los proyectos que hemos implementado.</p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-6">
             {projects.map(({ key, tags }, i) => (
               <motion.div
                 key={key}
-                className="group bg-card rounded-2xl border shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300"
-                initial={{ opacity: 0, y: 24 }}
+                className="group bg-card rounded-sm border border-border overflow-hidden hover:border-primary/50 hover:hard-shadow-sm transition-all duration-200"
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                transition={{ duration: 0.3, delay: i * 0.08 }}
               >
-                <div className="h-44 bg-gradient-to-br from-[#1E3A8A] to-[#0F172A] flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.2),transparent_60%)]" />
-                  <CheckCircle className="w-14 h-14 text-white/30 group-hover:text-white/60 group-hover:scale-110 transition-all duration-500" />
+                <div className="h-44 bg-[#0a0e1a] flex items-center justify-center relative overflow-hidden border-b border-border">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent_60%)]" />
+                  <CheckCircle className="w-14 h-14 text-white/20 group-hover:text-white/40 transition-colors duration-300" />
                 </div>
                 <div className="p-6">
-                  <h3 className="font-semibold text-foreground mb-1.5">{t(`sistema.${key}_name`)}</h3>
+                  <h3 className="font-semibold text-foreground mb-1.5 tracking-tight">{t(`sistema.${key}_name`)}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">{t(`sistema.${key}_desc`)}</p>
                   <div className="flex gap-1.5 flex-wrap">
                     {tags.map((tag) => (
-                      <span key={tag} className="text-[11px] font-medium bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200/50">{tag}</span>
+                      <span key={tag} className="text-[11px] font-medium uppercase tracking-wide bg-secondary text-muted-foreground border border-border px-2.5 py-1 rounded-sm">{tag}</span>
                     ))}
                   </div>
                 </div>
@@ -205,8 +205,8 @@ export default function SistemaHomePage() {
       {/* ───── Contact ───── */}
       <section id="contact" className={`${container} py-20 md:py-28`}>
         <motion.div className="text-center mb-14" {...fadeUp}>
-          <span className="text-xs font-semibold text-blue-600 uppercase tracking-widest">Contacto</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("sistema.contact_title")}</h2>
+          <span className="text-xs font-semibold text-primary uppercase tracking-widest">Contacto</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 tracking-tight">{t("sistema.contact_title")}</h2>
           <p className="text-muted-foreground mt-3 max-w-xl mx-auto">{t("sistema.contact_desc")}</p>
         </motion.div>
         <div className="max-w-lg mx-auto">
@@ -214,24 +214,24 @@ export default function SistemaHomePage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-12 bg-green-50 rounded-2xl border border-green-200"
+              className="text-center py-12 bg-emerald-500/10 rounded-sm border border-emerald-700/30"
             >
-              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-7 h-7 text-green-600" />
+              <div className="w-14 h-14 bg-emerald-500/15 rounded-sm flex items-center justify-center mx-auto mb-4 border border-emerald-700/30">
+                <CheckCircle className="w-7 h-7 text-emerald-700" />
               </div>
-              <p className="text-foreground font-semibold text-lg">{t("sistema.contact_success")}</p>
+              <p className="text-foreground font-semibold text-lg tracking-tight">{t("sistema.contact_success")}</p>
             </motion.div>
           ) : (
             <motion.form
               onSubmit={handleSubmit}
-              className="space-y-5 bg-card border rounded-2xl p-6 md:p-8 shadow-sm"
-              initial={{ opacity: 0, y: 16 }}
+              className="space-y-5 bg-card border border-border rounded-sm p-6 md:p-8 hard-shadow-sm"
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
             >
               <div>
-                <label className="text-sm font-medium text-foreground mb-1 block">{t("sistema.contact_name")}</label>
+                <label className="text-sm font-medium text-foreground mb-1 block tracking-tight">{t("sistema.contact_name")}</label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -240,7 +240,7 @@ export default function SistemaHomePage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground mb-1 block">{t("sistema.contact_email")}</label>
+                <label className="text-sm font-medium text-foreground mb-1 block tracking-tight">{t("sistema.contact_email")}</label>
                 <Input
                   type="email"
                   value={form.email}
@@ -250,7 +250,7 @@ export default function SistemaHomePage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground mb-1 block">{t("sistema.contact_message")}</label>
+                <label className="text-sm font-medium text-foreground mb-1 block tracking-tight">{t("sistema.contact_message")}</label>
                 <Textarea
                   rows={4}
                   value={form.message}
@@ -271,7 +271,7 @@ export default function SistemaHomePage() {
                   href="https://wa.me/51999000000?text=Hola!%20Quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20MultiSaas"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
+                  className="inline-flex items-center gap-2 text-sm text-emerald-700 hover:text-emerald-800 font-medium transition-colors"
                 >
                   <MessageCircle className="w-5 h-5" />
                   {t("sistema.contact_wsp")}

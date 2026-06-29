@@ -39,10 +39,12 @@ export default class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback
 
       return (
-        <div className="flex h-screen w-screen items-center justify-center">
+        <div className="flex h-screen w-screen items-center justify-center bg-muted/40">
           <div className="flex flex-col items-center gap-4 text-center max-w-md">
-            <AlertTriangle className="h-12 w-12 text-destructive" />
-            <h2 className="text-2xl font-bold">Algo salió mal</h2>
+            <div className="flex h-16 w-16 items-center justify-center rounded-sm border border-destructive/30 bg-destructive/10">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight">Algo salió mal</h2>
             <p className="text-muted-foreground">
               Ocurrió un error inesperado. Por favor intenta de nuevo.
             </p>
